@@ -3,6 +3,7 @@ import react from '@vitejs/plugin-react';
 import { VitePWA } from 'vite-plugin-pwa';
 
 export default defineConfig({
+  base: '/khu-key-demo/',
   plugins: [
     react(),
     VitePWA({
@@ -15,8 +16,8 @@ export default defineConfig({
         theme_color: '#f7f5ff',
         background_color: '#f7f5ff',
         display: 'standalone',
-        start_url: '/',
-        icons: [{ src: '/cookie.svg', sizes: 'any', type: 'image/svg+xml', purpose: 'any maskable' }]
+        start_url: '/khu-key-demo/',
+        icons: [{ src: 'cookie.svg', sizes: 'any', type: 'image/svg+xml', purpose: 'any maskable' }]
       }
     })
   ],

@@ -10,15 +10,9 @@ const roles = [
   { icon: '▶', title: '콘텐츠 기획자', tags: ['#콘텐츠', '#기획', '#스토리텔링'], desc: '사람들이 궁금해할 콘텐츠를 기획하고 채널에 맞게 전달해요.' },
   { icon: '✦', title: '서비스 기획자', tags: ['#서비스', '#기획', '#데이터'], desc: '사용자 경험을 살피고 더 편리한 서비스를 설계해요.' },
 ];
-const scripted: Record<number, string[]> = {
-  2: ['안녕! 나는 쿠키야 👋\n너를 잘 알아가기 위해 먼저 몇 가지 물어봐도 될까?', '응 좋아!'],
-  3: ['요즘 어떤 순간에 가장 에너지가 나?', '사람들이랑 의견을 조율하면서 결과를 만들어낼 때 재밌어!'],
-  4: ['그럴 때 네가 주로 맡는 역할은 뭐야?', '아이디어를 정리하고, 다 같이 할 수 있게 방향을 잡는 편이야.'],
-  5: ['조금 더 자세히 알아보기 위해 몇 가지 질문을 해볼게!', '좋아, 같이 찾아보자 😊'],
-};
 
 function Cookie({ small = false }: { small?: boolean }) {
-  return <img className={small ? 'cookie-avatar small' : 'cookie-avatar'} src="/cookie.svg" alt="쿠키 캐릭터" />;
+  return <img className={small ? 'cookie-avatar small' : 'cookie-avatar'} src={`${import.meta.env.BASE_URL}cookie.svg`} alt="쿠키 캐릭터" />;
 }
 
 function ChatBubble({ children, side = 'left' }: { children: ReactNode; side?: 'left' | 'right' }) {
