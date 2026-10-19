@@ -62,8 +62,9 @@ export async function extract(messages: Msg[]): Promise<ExtractReply> {
     const r = await post<{ result: unknown; credits?: number; demo?: boolean }>('/api/extract', { messages });
     return { result: ExploreResultSchema.parse(r.result), credits: r.credits, demo: !!r.demo };
   } catch (e) {
-    // 서버가 있는데 실패한 경우(502 등)는 "다시 시도"로 안내하고, 서버가 없으면 체험 모드로 돌아갑니다.
-    if (e instanceof HttpError && e.status !== 404) throw new Error('분석에 실패했어요. 다시 시도해 주세요.');
+    // 우리 서버가 실제로 실패한 경우(500번대)만 "다시 시도"로 안내합니다.
+    // 서버가 없는 GitHub Pages(404, 405)나 네트워크 오류는 체험 모드로 돌아갑니다.
+    if (e instanceof HttpError && e.status >= 500) throw new Error('분석에 실패했어요. 다시 시도해 주세요.');
     await wait(2600);
     return { result: ExploreResultSchema.parse(demo.result), demo: true };
   }
