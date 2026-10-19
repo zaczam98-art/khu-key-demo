@@ -1,35 +1,31 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
+import type { ExploreResult } from './lib/schema';
 
-type DemoState = {
-  screen: number;
-  styleChoices: string[];
-  userMessage: string;
-  setScreen: (screen: number) => void;
-  toggleStyle: (style: string) => void;
-  setUserMessage: (message: string) => void;
-  reset: () => void;
+type Mode = 'live' | 'demo' | null;
+type AppState = {
+  result: ExploreResult | null;
+  selectedJob: number;
+  mode: Mode;
+  credits: number;
+  setResult: (result: ExploreResult | null) => void;
+  selectJob: (index: number) => void;
+  note: (demo: boolean, credits?: number) => void;
+  resetExplore: () => void;
 };
 
-const initial = {
-  screen: 1,
-  styleChoices: [] as string[],
-  userMessage: '',
-};
-
-export const useDemoStore = create<DemoState>()(
+export const useAppStore = create<AppState>()(
   persist(
     (set) => ({
-      ...initial,
-      setScreen: (screen) => set({ screen: Math.min(10, Math.max(1, screen)) }),
-      toggleStyle: (style) => set((state) => ({
-        styleChoices: state.styleChoices.includes(style)
-          ? state.styleChoices.filter((item) => item !== style)
-          : [...state.styleChoices, style],
-      })),
-      setUserMessage: (userMessage) => set({ userMessage }),
-      reset: () => set(initial),
+      result: null,
+      selectedJob: 0,
+      mode: null,
+      credits: 0,
+      setResult: (result) => set({ result }),
+      selectJob: (selectedJob) => set({ selectedJob }),
+      note: (demo, credits) => set((s) => ({ mode: demo ? 'demo' : 'live', credits: s.credits + (credits ?? 0) })),
+      resetExplore: () => set({ result: null, selectedJob: 0 }),
     }),
-    { name: 'khu-key-demo-state' },
+    { name: 'khu-key-state' },
   ),
 );

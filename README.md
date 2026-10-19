@@ -1,69 +1,58 @@
-# KHU:KEY — 쿠키와 직무 탐색 데모
+# KHU:KEY (쿠키)
 
-경희대학교 교내 AI 경진대회 제출을 위한 **프론트엔드 데모 프로토타입**입니다. 첨부 시안의 직무 탐색 10단계 흐름을 모바일 우선 UI로 구성했습니다.
+2026 KHU AI Challenge 출품작 "쿠키"의 코드입니다. 쿠키는 취업 준비생에게 먼저 질문을 던져 경험을 끌어내고, 그 결과를 직무 탐색·자소서·면접까지 이어서 쓰는 AI 커리어 메이트입니다. 쿠키가 하는 말과 판단은 모두 ChatKHU에서 오고, 이 저장소는 화면(PWA), 저장(IndexedDB), 서버 중계(Vercel Functions)를 담당합니다.
 
-> 이 저장소는 데모 전용입니다. 실제 LLM/API 호출, 챗봇 시스템 프롬프트, 챗봇 ID, 사용자 계정, 서버 저장 기능은 포함하지 않습니다. 대화·분석 결과는 화면 시연용 예시입니다.
+작업 가이드는 `CLAUDE.md`, 협업 규칙은 `AGENTS.md`, 진행 순서는 `docs/roadmap.md`에 있습니다.
 
-## 데모 범위
+## 지금 상태 (2026-10-19)
 
-- 시작 화면과 쿠키 캐릭터
-- 직무 탐색 대화 흐름과 스타일 선택
-- 분석 중 애니메이션 및 키워드 요약
-- 직무 추천 3개, 직무 상세, 프로필 저장 완료 화면
-- Zustand 상태 유지, IndexedDB(Dexie) 데모 프로필 저장
-- Vite PWA 기본 manifest/service worker 설정
-- 데모 상태는 브라우저에 저장되며, 민감한 실제 개인정보를 입력하지 마세요.
+- 0단계 뼈대와 1단계 직무 탐색 10화면이 끝났습니다. 시안은 `design/01_직무탐색.png`, 문구는 `design/copy.md`입니다.
+- ChatKHU 키와 챗봇 id가 없으면 체험 모드로 돌아갑니다. 시안의 대화가 그대로 재생되고 추천 답변이 칩으로 나옵니다.
+- 체험 모드 배포: https://zaczam98-art.github.io/khu-key-demo/ (서버 없음, main에 합쳐지면 자동 배포)
+- 캐릭터 이미지는 자리표시입니다. `public/char/{default,smile,think,wink,suit,heart}.png`를 같은 이름으로 바꿔 끼우면 됩니다.
 
-## 로컬 실행
+## 실행
 
-필요 조건: Node.js 20 이상 권장
+Node 20 이상, pnpm이 필요합니다.
 
 ```bash
-npm install
-npm run dev
+pnpm install
+cp .env.example .env.local   # 키가 없어도 됩니다
+pnpm dev                     # 같은 와이파이의 폰에서는 터미널에 찍힌 Network 주소로 접속
 ```
 
-Vite가 출력하는 로컬 주소를 브라우저에서 엽니다.
-
-프로덕션 빌드 확인:
+상위 폴더 이름에 `;`가 있으면 `pnpm dev`가 vite를 못 찾을 수 있습니다. 그때는 `node node_modules/vite/bin/vite.js --host`로 직접 실행합니다.
 
 ```bash
-npm run build
-npm run preview
+pnpm test     # 규칙 함수 테스트 (vitest)
+pnpm build    # tsc 검사 + vite 빌드
 ```
 
-## GitHub에 올리기
+## ChatKHU 연결
 
-```bash
-git init
-git add .
-git commit -m "Initial KHU:KEY career demo"
-git branch -M main
-git remote add origin https://github.com/<YOUR_ACCOUNT>/<YOUR_REPOSITORY>.git
-git push -u origin main
+`.env.local`에 아래 둘만 넣으면 실제 대화와 분석이 ChatKHU로 갑니다. 발급 방법은 `.env.example`과 `docs/chatkhu-api.md`에 있습니다.
+
+```
+CHATKHU_API_KEY=       # API Gateway 화면에서 발급한 키
+CHATKHU_BOT_EXPLORE=   # 스튜디오 "직무 탐색" 챗봇 id (비우면 일반 모델 + 쿠키 지시문으로 대화)
 ```
 
-GitHub Pages 배포 시에는 저장소 하위 경로(base path)에 맞춰 Vite의 `base` 설정과 라우팅 경로를 확인하세요. Vercel 또는 Netlify에서는 기본 Vite 프로젝트로 배포할 수 있습니다.
+브라우저 코드에는 키가 들어가지 않습니다. 호출은 전부 `server/lib/chatkhu.ts`를 거칩니다.
 
-## 프로젝트 구조
+## 배포
 
-```text
-src/
-  App.tsx       직무 탐색 데모 10화면과 사용자 상호작용
-  db.ts         Dexie IndexedDB 데모 프로필 저장소
-  store.ts      Zustand 화면/선택 상태
-  index.css     모바일 UI 스타일
-  main.tsx      앱 진입점과 PWA 등록
-public/
-  cookie.svg    데모용 쿠키 캐릭터 아이콘
+- GitHub Pages: `.github/workflows/deploy.yml`이 main 푸시마다 `VITE_BASE=/khu-key-demo/`로 빌드해 올립니다. 서버가 없으므로 체험 모드입니다.
+- Vercel: 저장소를 연결하고 환경변수(`CHATKHU_*`)를 넣으면 `api/`가 서버 함수로 올라가 실제 모드가 됩니다. `vercel.json`에 SPA 재작성 규칙이 있습니다.
+
+## 폴더
+
 ```
-
-## 구현 메모
-
-- 현재 대화 응답과 분석 결과는 `src/App.tsx`의 데모 데이터입니다. 실제 AI 호출로 오인하지 않도록 화면에 데모 표시를 넣었습니다.
-- 챗봇 프롬프트·챗봇 ID는 의도적으로 포함하지 않았습니다. 실제 연결 시 브라우저에서 API Key를 직접 호출하지 말고, 별도 서버 API를 통해 호출하세요.
-- 프로젝트는 MIT License로 제공됩니다. 다른 라이선스가 필요하면 GitHub 공개 전에 `LICENSE`를 바꾸세요.
-
-## 사용 기술
-
-React · TypeScript · Vite · Zustand · Dexie · vite-plugin-pwa · CSS
+api/            Vercel Functions: chat/[bot].ts, extract.ts
+server/         lib/chatkhu.ts(호출 한 곳), prompts/(지시문), demo/(체험 대본), dev-api.ts(로컬 /api)
+src/components  ChatShell, Character, Header, TabBar, Icon
+src/screens     home, explore(10화면), profile, essay, mock
+src/lib         db(Dexie), mask, events, schema(zod), api, profile
+src/data        jobs.ts 직무 사전
+design/         시안 PNG, copy.md
+docs/           chatkhu-api.md, prompts.md, decisions.md, roadmap.md
+```
