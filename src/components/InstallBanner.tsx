@@ -6,10 +6,10 @@ export function InstallBanner() {
   const { canInstall, install } = usePwaInstall();
   if (!canInstall) return null;
   return (
-    <div className="rise mt-4 flex items-center gap-3 rounded-card bg-ink px-4 py-3 text-white">
+    <div className="rise mt-4 flex items-center gap-3 rounded-card bg-ink px-4 py-3 text-surface">
       <Icon name="install" size={22} className="shrink-0 text-lavender" />
-      <p className="flex-1 text-[13px] leading-snug">홈 화면에 추가하면 앱처럼 바로 열려요.</p>
-      <button type="button" onClick={() => void install()} className="press rounded-full bg-primary px-3 py-1.5 text-[13px] font-semibold">
+      <p className="flex-1 text-small leading-snug">홈 화면에 추가하면 앱처럼 바로 열려요.</p>
+      <button type="button" onClick={() => void install()} className="press min-h-[36px] rounded-full bg-primary px-3 text-small font-semibold text-white">
         추가
       </button>
     </div>

@@ -2,50 +2,111 @@
 @tailwind components;
 @tailwind utilities;
 
-/* 디자인 토큰은 tailwind.config.js 에 있습니다. (CLAUDE.md 7절) */
+/* ---------- 디자인 토큰 (CLAUDE.md 7절). 색은 "r g b" 로 적어 Tailwind 가 투명도를 섞을 수 있게 합니다. ---------- */
+:root {
+  --c-primary: 123 108 246;
+  --c-primary-soft: 238 235 255;
+  --c-bg: 247 246 251;
+  --c-surface: 255 255 255;
+  --c-surface-2: 250 249 255;
+  --c-ink: 34 34 34;
+  --c-muted: 94 94 120;
+  --c-line: 232 229 245;
+  --c-success: 47 178 112;
+  --c-warn: 240 160 48;
+  --c-danger: 229 77 92;
+  --c-info: 79 124 246;
+  --c-frame: 233 230 245;
+  --dur-fast: 150ms;
+  --dur-base: 280ms;
+  --dur-slow: 450ms;
+  --ease: cubic-bezier(0.2, 0.8, 0.2, 1);
+  color-scheme: light;
+}
+[data-theme='dark'] {
+  --c-primary: 154 142 255;
+  --c-primary-soft: 46 40 78;
+  --c-bg: 22 20 32;
+  --c-surface: 32 29 46;
+  --c-surface-2: 40 36 58;
+  --c-ink: 240 238 250;
+  --c-muted: 164 160 190;
+  --c-line: 56 51 80;
+  --c-frame: 12 11 18;
+  color-scheme: dark;
+}
+
 @layer base {
   html {
     -webkit-tap-highlight-color: transparent;
   }
   body {
-    @apply bg-[#E9E6F5] font-sans text-ink antialiased;
+    @apply bg-frame font-sans text-ink antialiased;
+  }
+  :focus-visible {
+    outline: 2px solid rgb(var(--c-primary));
+    outline-offset: 2px;
+    border-radius: 8px;
+  }
+  input,
+  textarea,
+  select {
+    font: inherit;
   }
 }
 
 @layer components {
   .bubble-bot {
-    @apply max-w-[272px] whitespace-pre-line rounded-bubble rounded-tl-md bg-lavender px-4 py-3 text-[14px] leading-relaxed text-ink;
+    @apply max-w-[272px] whitespace-pre-line rounded-bubble rounded-tl-md bg-lavender px-4 py-3 text-[0.875rem] leading-relaxed text-ink;
   }
   .bubble-user {
-    @apply max-w-[272px] whitespace-pre-line rounded-bubble rounded-tr-md bg-primary px-4 py-3 text-[14px] leading-relaxed text-white;
+    @apply max-w-[272px] whitespace-pre-line rounded-bubble rounded-tr-md bg-primary px-4 py-3 text-[0.875rem] leading-relaxed text-white;
   }
   .chip {
-    @apply whitespace-pre-line rounded-full border border-lavender bg-white px-3 py-1.5 text-[13px] text-primary shadow-card transition-colors active:bg-lavender;
+    @apply inline-flex min-h-[40px] items-center gap-1 whitespace-pre-line rounded-full border border-line bg-surface px-3.5 py-2 text-small text-primary shadow-card transition-colors duration-fast active:bg-lavender;
+  }
+  .chip-on {
+    @apply border-primary bg-primary text-white;
   }
   .chip-primary {
     @apply border-primary bg-primary text-white;
   }
   .btn-primary {
-    @apply flex h-12 items-center justify-center gap-1 rounded-full bg-primary px-5 text-[15px] font-semibold text-white transition-[transform,opacity] duration-150 active:scale-[0.98] active:opacity-90 disabled:opacity-40;
+    @apply flex min-h-[48px] items-center justify-center gap-1.5 rounded-full bg-primary px-5 text-body font-semibold text-white transition-[transform,opacity] duration-fast active:scale-[0.98] active:opacity-90 disabled:opacity-40;
   }
   .btn-secondary {
-    @apply flex h-12 items-center justify-center gap-1 rounded-full border border-primary/30 bg-white px-5 text-[15px] font-semibold text-primary shadow-card transition-transform duration-150 active:scale-[0.98];
+    @apply flex min-h-[48px] items-center justify-center gap-1.5 rounded-full border border-primary/30 bg-surface px-5 text-body font-semibold text-primary shadow-card transition-transform duration-fast active:scale-[0.98] disabled:opacity-50;
+  }
+  .btn-ghost {
+    @apply inline-flex min-h-[44px] items-center justify-center gap-1 rounded-full px-4 text-small font-medium text-muted transition-colors duration-fast active:bg-lavender;
   }
   .card {
-    @apply rounded-card bg-white p-5 shadow-card;
+    @apply rounded-card bg-surface p-5 shadow-card;
   }
   .tag {
-    @apply rounded-full bg-lavender px-2 py-0.5 text-[12px] text-primary;
+    @apply rounded-full bg-lavender px-2 py-0.5 text-caption text-primary;
+  }
+  .field {
+    @apply w-full rounded-tile border border-line bg-surface px-3.5 py-3 text-body text-ink outline-none transition-shadow duration-fast placeholder:text-muted/60 focus:ring-2 focus:ring-primary/30;
+  }
+  .label {
+    @apply mb-1.5 block text-small font-medium text-muted;
+  }
+  .section-title {
+    @apply text-heading text-ink;
   }
   .toast {
-    @apply fixed bottom-24 left-1/2 z-30 -translate-x-1/2 whitespace-nowrap rounded-full bg-ink/90 px-4 py-2 text-[13px] text-white shadow-lg;
+    @apply fixed bottom-24 left-1/2 z-30 -translate-x-1/2 whitespace-nowrap rounded-full bg-ink/90 px-4 py-2 text-small text-surface shadow-pop;
   }
   .press {
-    @apply transition-transform duration-150 active:scale-[0.97];
+    @apply transition-transform duration-fast active:scale-[0.97];
+  }
+  .tile {
+    @apply flex h-12 w-12 shrink-0 items-center justify-center rounded-tile;
   }
 }
 
-/* 동작. Tailwind 레이어 밖에 두어 항상 포함되게 합니다. */
+/* ---------- 동작. Tailwind 레이어 밖에 두어 항상 포함되게 합니다. 길이는 토큰(--dur-*)을 씁니다. ---------- */
 @keyframes fade-up {
   from { opacity: 0; transform: translateY(10px); }
   to { opacity: 1; transform: none; }
@@ -80,16 +141,32 @@
   40% { transform: scale(1.4); }
   100% { transform: scale(1); }
 }
+@keyframes slide-up {
+  from { transform: translateY(100%); }
+  to { transform: none; }
+}
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@keyframes vt-out {
+  to { opacity: 0; transform: translateX(-12px); }
+}
+@keyframes vt-in {
+  from { opacity: 0; transform: translateX(12px); }
+}
 
-.page { animation: fade-up 0.28s ease-out both; }
-.rise { animation: fade-up 0.45s ease-out both; }
-.pop { animation: pop 0.3s ease-out both; }
+.page { animation: fade-up var(--dur-base) var(--ease) both; }
+.rise { animation: fade-up var(--dur-slow) var(--ease) both; }
+.pop { animation: pop var(--dur-base) var(--ease) both; }
+.fade-in { animation: fade-in var(--dur-base) var(--ease) both; }
+.slide-up { animation: slide-up var(--dur-base) var(--ease) both; }
 .float { animation: float 3.5s ease-in-out infinite; }
 .drift { animation: drift 3s ease-out infinite; }
 .spin { animation: spin 1s linear infinite; }
-.heart-pop { animation: heart-pop 0.4s ease-out; }
+.heart-pop { animation: heart-pop 0.4s var(--ease); }
 .skeleton {
-  background: linear-gradient(90deg, #eeebff 25%, #f7f6fb 50%, #eeebff 75%);
+  background: linear-gradient(90deg, rgb(var(--c-primary-soft)) 25%, rgb(var(--c-bg)) 50%, rgb(var(--c-primary-soft)) 75%);
   background-size: 200% 100%;
   animation: shimmer 1.4s linear infinite;
 }
@@ -103,14 +180,22 @@
   width: 6px;
   height: 6px;
   border-radius: 9999px;
-  background: #7b6cf6;
+  background: rgb(var(--c-primary));
   animation: bounce-dot 1.2s infinite;
 }
 .typing span:nth-child(2) { animation-delay: 0.15s; }
 .typing span:nth-child(3) { animation-delay: 0.3s; }
 
+/* View Transitions API 를 지원하면 화면 전체는 브라우저 전환을 쓰고, .page 의 자체 전환은 끕니다. */
+html.has-vt .page { animation: none; }
+::view-transition-old(root) { animation: vt-out var(--dur-base) var(--ease) both; }
+::view-transition-new(root) { animation: vt-in var(--dur-base) var(--ease) both; }
+::view-transition-old(job-tile),
+::view-transition-new(job-tile) { animation-duration: var(--dur-slow); }
+
 @media (prefers-reduced-motion: reduce) {
-  .page, .rise, .pop, .float, .drift, .spin, .heart-pop, .skeleton, .typing span {
+  .page, .rise, .pop, .fade-in, .slide-up, .float, .drift, .spin, .heart-pop, .skeleton, .typing span {
     animation: none !important;
   }
+  ::view-transition-old(root), ::view-transition-new(root) { animation: none !important; }
 }

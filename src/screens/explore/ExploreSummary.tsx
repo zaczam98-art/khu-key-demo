@@ -1,64 +1,82 @@
+import { useState } from 'react';
 import { Navigate, useNavigate } from 'react-router-dom';
 import { TitleHeader } from '../../components/Header';
 import { Icon } from '../../components/Icon';
+import { Spinner } from '../../components/ui';
+import { db } from '../../lib/db';
+import { renderShareCard, shareOrDownload } from '../../lib/shareCard';
 import { useAppStore } from '../../store';
 
-// 7. 탐색 결과 요약
+// 7. 탐색 결과 요약. 우상단 아이콘은 결과를 이미지 카드로 저장·공유합니다.
 export function ExploreSummary() {
   const nav = useNavigate();
   const result = useAppStore((s) => s.result);
   const mode = useAppStore((s) => s.mode);
   const showToast = useAppStore((s) => s.showToast);
+  const [sharing, setSharing] = useState(false);
   if (!result) return <Navigate to="/explore" replace />;
 
-  const copy = async () => {
-    const text = `쿠키가 발견한 키워드: ${result.keywords.join(', ')}\n${result.traits.map((t) => `- ${t}`).join('\n')}`;
+  const share = async () => {
+    setSharing(true);
     try {
-      await navigator.clipboard.writeText(text);
-      showToast('결과를 복사했어요');
+      const profile = await db.profile.get('me');
+      const blob = await renderShareCard(result, profile?.nickname);
+      const how = await shareOrDownload(blob, 'cookie-result.png');
+      showToast(how === 'shared' ? '공유했어요' : '이미지로 저장했어요');
     } catch {
-      showToast('복사할 수 없는 브라우저예요');
+      try {
+        await navigator.clipboard.writeText(`쿠키가 발견한 키워드: ${result.keywords.join(', ')}\n${result.traits.map((t) => `- ${t}`).join('\n')}`);
+        showToast('이미지 대신 글로 복사했어요');
+      } catch {
+        showToast('이 브라우저에서는 저장할 수 없어요');
+      }
+    } finally {
+      setSharing(false);
     }
   };
 
   return (
-    <div className="flex min-h-dvh flex-col bg-canvas">
+    <div className="flex min-h-full flex-col bg-canvas">
       <TitleHeader
         title="탐색 결과 요약"
         back="/explore/chat"
         right={
-          <button type="button" aria-label="결과 복사" onClick={() => void copy()} className="press text-ink">
-            <Icon name="download" size={22} />
+          <button type="button" aria-label="결과 카드 저장" onClick={() => void share()} disabled={sharing} className="press flex h-11 w-11 items-center justify-center rounded-full text-ink">
+            {sharing ? <Spinner /> : <Icon name="share" size={22} />}
           </button>
         }
       />
       <div className="flex-1 px-4 pb-8 pt-2">
         <section className="rise rounded-card bg-lavender p-5">
-          <h2 className="flex items-center gap-1.5 text-[15px] font-semibold text-ink">
+          <h2 className="flex items-center gap-1.5 text-body font-semibold text-ink">
             <Icon name="sparkle" size={16} className="text-primary" />
             쿠키가 발견한 너의 키워드
           </h2>
           <div className="mt-3 flex flex-wrap gap-2">
             {result.keywords.map((keyword, i) => (
-              <span key={keyword} className="pop rounded-full bg-white px-3 py-1.5 text-[13px] text-ink shadow-card" style={{ animationDelay: `${150 + i * 80}ms` }}>
+              <span key={keyword} className="pop rounded-full bg-surface px-3 py-1.5 text-small text-ink shadow-card" style={{ animationDelay: `${150 + i * 80}ms` }}>
                 {keyword}
               </span>
             ))}
           </div>
         </section>
-        <h3 className="rise mt-6 text-[16px] font-semibold text-ink" style={{ animationDelay: '300ms' }}>
+        <h3 className="rise mt-6 section-title" style={{ animationDelay: '300ms' }}>
           이런 성향을 가진 것 같아!
         </h3>
         <ul className="mt-3 space-y-3">
           {result.traits.map((trait, i) => (
-            <li key={trait} className="rise flex items-start gap-2 text-[14px] leading-relaxed text-ink" style={{ animationDelay: `${400 + i * 90}ms` }}>
-              <Icon name="check" size={18} className="mt-0.5 shrink-0 text-primary" />
+            <li key={trait} className="rise flex items-start gap-2 text-[0.875rem] leading-relaxed text-ink" style={{ animationDelay: `${400 + i * 90}ms` }}>
+              <Icon name="check" size={18} className="mt-0.5 shrink-0 text-primary" strokeWidth={2.5} />
               {trait}
             </li>
           ))}
         </ul>
-        {mode === 'demo' && <p className="rise mt-5 text-center text-[12px] text-muted" style={{ animationDelay: '800ms' }}>체험 모드 결과예요. ChatKHU를 연결하면 실제 대화로 분석해요.</p>}
-        <button type="button" onClick={() => nav('/explore/jobs')} className="btn-primary rise mt-6 w-full" style={{ animationDelay: '850ms' }}>
+        {mode === 'demo' && (
+          <p className="rise mt-5 text-center text-caption text-muted" style={{ animationDelay: '800ms' }}>
+            체험 모드 결과예요. ChatKHU를 연결하면 실제 대화로 분석해요.
+          </p>
+        )}
+        <button type="button" onClick={() => nav('/explore/jobs', { viewTransition: true })} className="btn-primary rise mt-6 w-full" style={{ animationDelay: '850ms' }}>
           추천 직무 보기
           <Icon name="arrow" size={18} />
         </button>

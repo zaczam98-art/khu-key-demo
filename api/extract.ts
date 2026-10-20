@@ -1,5 +1,5 @@
 // POST /api/extract  { messages } -> { result: {keywords, traits, jobs}, credits?, demo }
-import { completeJson, demoExtract, type Msg } from '../server/lib/chatkhu';
+import { completeJson, demoData, type Msg } from '../server/lib/chatkhu';
 import { json } from '../server/lib/http';
 import { EXPLORE_EXTRACT_SYSTEM } from '../server/prompts/explore-extract';
 import { ExploreResultSchema, exploreResultJsonSchema, type ExploreResult } from '../src/lib/schema';
@@ -18,7 +18,7 @@ export async function POST(req: Request): Promise<Response> {
       'explore_result',
       anon,
       (data) => ExploreResultSchema.parse(data),
-      ExploreResultSchema.parse(demoExtract),
+      ExploreResultSchema.parse(demoData.explore),
     );
     return json({ result: r.data, credits: r.credits, demo: r.demo });
   } catch (e) {

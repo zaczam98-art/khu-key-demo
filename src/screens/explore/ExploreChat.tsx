@@ -13,7 +13,7 @@ export function ExploreChat() {
       back="/explore"
       maxTurns={9}
       onEvent={(event) => {
-        if (event.type === 'analyze') nav('/explore/analyzing');
+        if (event.type === 'analyze') nav('/explore/analyzing', { viewTransition: true });
       }}
     />
   );

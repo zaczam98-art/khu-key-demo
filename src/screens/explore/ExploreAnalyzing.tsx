@@ -35,7 +35,7 @@ export function ExploreAnalyzing() {
         setResult(reply.result);
         setStep(STEPS.length);
         window.setTimeout(() => {
-          if (alive) nav('/explore/summary');
+          if (alive) nav('/explore/summary', { viewTransition: true });
         }, 800);
       } catch (e) {
         if (!alive) return;
@@ -53,23 +53,22 @@ export function ExploreAnalyzing() {
   const ratio = error ? 0 : done / STEPS.length;
 
   return (
-    <div className="flex min-h-dvh flex-col bg-canvas">
+    <div className="flex min-h-full flex-col bg-canvas">
       <ChatHeader expr="think" back="/explore/chat" />
       <div className="flex flex-1 flex-col items-center px-6 pt-6">
         <div className="relative flex h-[136px] w-[136px] items-center justify-center">
           <svg width="136" height="136" viewBox="0 0 136 136" className="absolute inset-0 -rotate-90">
-            <circle cx="68" cy="68" r={RADIUS} fill="none" stroke="#EEEBFF" strokeWidth="8" />
+            <circle cx="68" cy="68" r={RADIUS} fill="none" className="stroke-lavender" strokeWidth="8" />
             <circle
               cx="68"
               cy="68"
               r={RADIUS}
               fill="none"
-              stroke="#7B6CF6"
+              className="stroke-primary transition-[stroke-dashoffset] duration-slow ease-app"
               strokeWidth="8"
               strokeLinecap="round"
               strokeDasharray={CIRCUMFERENCE}
               strokeDashoffset={CIRCUMFERENCE * (1 - ratio)}
-              className="transition-[stroke-dashoffset] duration-700 ease-out"
             />
           </svg>
           <Character expr="think" size={96} float />
@@ -77,21 +76,19 @@ export function ExploreAnalyzing() {
             <Icon name="bulb" size={22} />
           </span>
         </div>
-        <p className="mt-2 text-[12px] font-semibold tabular-nums text-primary">{Math.round(ratio * 100)}%</p>
-        <h1 className="mt-2 whitespace-pre-line text-center text-[18px] font-semibold leading-snug text-ink">
-          {'지금까지의 대화를 바탕으로\n너의 특징을 정리하고 있어!'}
-        </h1>
+        <p className="mt-2 text-caption font-semibold tabular-nums text-primary">{Math.round(ratio * 100)}%</p>
+        <h1 className="mt-2 whitespace-pre-line text-center text-heading text-ink">{'지금까지의 대화를 바탕으로\n너의 특징을 정리하고 있어!'}</h1>
         <div className="card rise mt-6 w-full space-y-3">
           {STEPS.map((label, i) => {
             const state = i < step ? 'done' : i === step && !error ? 'active' : 'todo';
             return (
-              <div key={label} className={`flex items-center gap-3 text-[14px] transition-colors ${state === 'todo' ? 'text-muted/70' : 'text-ink'}`}>
+              <div key={label} className={`flex items-center gap-3 text-[0.875rem] transition-colors duration-base ${state === 'todo' ? 'text-muted/70' : 'text-ink'}`}>
                 <span
-                  className={`flex h-6 w-6 items-center justify-center rounded-full border-2 transition-colors ${
-                    state === 'done' ? 'pop border-primary bg-primary text-white' : state === 'active' ? 'animate-pulse border-primary' : 'border-lavender'
+                  className={`flex h-6 w-6 items-center justify-center rounded-full border-2 transition-colors duration-base ${
+                    state === 'done' ? 'pop border-primary bg-primary text-white' : state === 'active' ? 'border-primary' : 'border-line'
                   }`}
                 >
-                  {state === 'done' && <Icon name="check" size={14} />}
+                  {state === 'done' && <Icon name="check" size={14} strokeWidth={3} />}
                   {state === 'active' && <span className="spin h-3 w-3 rounded-full border-2 border-primary border-t-transparent" />}
                 </span>
                 {label}
@@ -101,7 +98,7 @@ export function ExploreAnalyzing() {
         </div>
         {error && (
           <div className="rise mt-6 w-full text-center">
-            <p className="text-[14px] text-warn">{error}</p>
+            <p className="text-[0.875rem] text-warn">{error}</p>
             <button type="button" onClick={() => setAttempt((n) => n + 1)} className="btn-primary mt-3 w-full">
               <Icon name="refresh" size={18} />
               다시 시도

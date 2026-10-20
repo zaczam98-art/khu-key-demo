@@ -14,13 +14,14 @@ const HEARTS = [
 export function ExploreSaved() {
   const nav = useNavigate();
   return (
-    <div className="flex min-h-dvh flex-col items-center bg-gradient-to-b from-lavender via-canvas to-canvas px-6 pb-8 pt-[max(24px,env(safe-area-inset-top))]">
+    <div className="flex min-h-full flex-col items-center bg-gradient-to-b from-lavender via-canvas to-canvas px-6 pb-8 pt-[max(24px,env(safe-area-inset-top))]">
       <div className="relative mt-8 flex h-[260px] w-full items-center justify-center">
         {HEARTS.map((h, i) => (
           <Icon
             key={i}
             name="heart"
             size={h.size}
+            fill="#F08BB0"
             className="drift absolute text-[#F08BB0]"
             style={{ left: h.left, top: h.top, animationDelay: h.delay, animationDuration: h.duration }}
           />
@@ -29,18 +30,18 @@ export function ExploreSaved() {
         <Icon name="sparkle" size={14} className="pop absolute right-[16%] top-[70%] text-primary/50" style={{ animationDelay: '0.9s' }} />
         <Character expr="heart" size={220} float className="pop" />
       </div>
-      <h1 className="rise mt-6 whitespace-pre-line text-center text-[22px] font-bold leading-snug text-ink" style={{ animationDelay: '200ms' }}>
+      <h1 className="rise mt-6 whitespace-pre-line text-center text-title text-ink" style={{ animationDelay: '200ms' }}>
         {'탐색 결과가\n내 프로필에 저장됐어!'}
       </h1>
-      <p className="rise mt-4 whitespace-pre-line text-center text-[14px] leading-relaxed text-muted" style={{ animationDelay: '350ms' }}>
+      <p className="rise mt-4 whitespace-pre-line text-center text-[0.875rem] leading-relaxed text-muted" style={{ animationDelay: '350ms' }}>
         {'앞으로 자소서 작성, 면접 준비 등\n취업 준비 과정에서 이 정보를 활용할게.\n언제든지 다시 와서 더 이야기해줘! 💜'}
       </p>
       <div className="flex-1" />
-      <button type="button" onClick={() => nav('/profile')} className="btn-primary rise w-full" style={{ animationDelay: '500ms' }}>
+      <button type="button" onClick={() => nav('/profile/experience/new', { viewTransition: true })} className="btn-primary rise w-full" style={{ animationDelay: '500ms' }}>
         다음 단계로 이동하기
         <Icon name="arrow" size={18} />
       </button>
-      <Link to="/" className="rise mt-4 text-[14px] text-muted" style={{ animationDelay: '600ms' }}>
+      <Link to="/" viewTransition className="btn-ghost rise mt-2" style={{ animationDelay: '600ms' }}>
         나중에 할게요
       </Link>
     </div>

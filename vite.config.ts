@@ -17,7 +17,11 @@ export default defineConfig(({ mode }) => {
       devApi(),
       VitePWA({
         registerType: 'autoUpdate',
-        includeAssets: ['char/*.png', 'icons/*.png'],
+        includeAssets: ['char/*.png', 'icons/*.png', 'push-sw.js'],
+        workbox: {
+          importScripts: ['push-sw.js'],
+          navigateFallbackDenylist: [/^\/api\//],
+        },
         manifest: {
           name: '쿠키 | KHU:KEY 커리어 메이트',
           short_name: '쿠키',

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 
 // 네트워크 상태. 대화 헤더의 "온라인" 표시에 씁니다.
 export function useOnline(): boolean {
@@ -48,4 +48,40 @@ export function usePwaInstall(): { canInstall: boolean; install: () => Promise<v
     setEvent(null);
   };
   return { canInstall: !!event && !installed, install };
+}
+
+// Dexie 조회를 화면 상태로. reload() 를 부르면 다시 읽습니다.
+export function useAsync<T>(load: () => Promise<T>, deps: unknown[] = []): { data: T | undefined; loading: boolean; reload: () => void } {
+  const [data, setData] = useState<T | undefined>(undefined);
+  const [loading, setLoading] = useState(true);
+  const [tick, setTick] = useState(0);
+  useEffect(() => {
+    let alive = true;
+    setLoading(true);
+    load().then((v) => {
+      if (!alive) return;
+      setData(v);
+      setLoading(false);
+    });
+    return () => {
+      alive = false;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [...deps, tick]);
+  const reload = useCallback(() => setTick((t) => t + 1), []);
+  return { data, loading, reload };
+}
+
+// 현재 시각(1분마다 갱신). 데스크톱 폰 프레임의 상태바에 씁니다.
+export function useClock(): string {
+  const fmt = () => {
+    const d = new Date();
+    return `${d.getHours()}:${String(d.getMinutes()).padStart(2, '0')}`;
+  };
+  const [time, setTime] = useState(fmt);
+  useEffect(() => {
+    const t = window.setInterval(() => setTime(fmt()), 30_000);
+    return () => window.clearInterval(t);
+  }, []);
+  return time;
 }

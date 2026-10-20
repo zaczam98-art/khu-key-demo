@@ -1,18 +1,40 @@
 // ChatKHU 호출은 전부 이 파일을 거칩니다. (CLAUDE.md 4절 서버 공통 규칙)
 // 키 선택, 호출, 사용량 기록, 일일 상한 검사, 실패 시 데모 응답을 여기서 처리합니다.
 // 요청·응답 형식은 docs/chatkhu-api.md 에 적힌 확인 내용을 따릅니다.
-import demo from '../demo/explore.json';
+import essayDemo from '../demo/essay.json';
+import exploreDemo from '../demo/explore.json';
+import interviewDemo from '../demo/interview.json';
+import mockDemo from '../demo/mock.json';
 import { COOKIE_EXPLORE_SYSTEM } from '../prompts/explore-chat';
+import { COOKIE_INTERVIEW_SYSTEM } from '../prompts/interview-chat';
+import { COOKIE_MOCK_SYSTEM } from '../prompts/mock-chat';
 
 export type Msg = { role: 'user' | 'assistant' | 'system'; content: string };
 export type ChatResult = { bubbles: string[]; credits?: number; demo: boolean; reason?: string };
 export type JsonResult<T> = { data: T; credits?: number; demo: boolean; reason?: string };
+export type Bot = 'explore' | 'interview' | 'essay' | 'mock';
 
 const BASE = () => (process.env.CHATKHU_BASE || 'https://factchat-cloud.mindlogic.ai/v1/gateway').replace(/\/$/, '');
 const KEY = () => process.env.CHATKHU_API_KEY || process.env.CHATKHU_API_KEY_A || '';
 const MODEL = () => process.env.CHATKHU_MODEL || 'claude-sonnet-5-5';
 const CAP = () => Number(process.env.DAILY_CREDIT_CAP || 550);
 export const botId = (bot: string): string => process.env[`CHATKHU_BOT_${bot.toUpperCase()}`] || '';
+
+// 챗봇 id 가 없을 때 일반 모델에 붙이는 지시문 (스튜디오 챗봇에도 같은 규약을 넣습니다)
+const FALLBACK_SYSTEM: Record<Bot, string> = {
+  explore: COOKIE_EXPLORE_SYSTEM,
+  interview: COOKIE_INTERVIEW_SYSTEM,
+  essay: COOKIE_INTERVIEW_SYSTEM,
+  mock: COOKIE_MOCK_SYSTEM,
+};
+// 체험 모드 대본
+const DEMO_REPLIES: Record<Bot, string[][]> = {
+  explore: exploreDemo.replies,
+  interview: interviewDemo.replies,
+  essay: interviewDemo.replies,
+  mock: mockDemo.replies,
+};
+export const demoData = { explore: exploreDemo.result, experience: interviewDemo.result, post: essayDemo.post, draft: essayDemo.draft, feedback: essayDemo.feedback, score: mockDemo.result };
 
 // 1K 토큰당 (입력, 출력) 크레딧 추정 단가. 문서에 공식 단가가 없어 CLAUDE.md 값을 쓰고, usage 가 없으면 글자 수÷2 로 근사합니다.
 const PRICE: Record<string, [number, number]> = {
@@ -70,14 +92,18 @@ async function call(path: string, body: unknown): Promise<Completion> {
 }
 
 const userCount = (messages: Msg[]) => messages.filter((m) => m.role === 'user').length;
-const demoBubbles = (messages: Msg[]): string[] =>
-  demo.replies[Math.min(Math.max(userCount(messages) - 1, 0), demo.replies.length - 1)];
+function demoBubbles(bot: Bot, messages: Msg[]): string[] {
+  const replies = DEMO_REPLIES[bot];
+  return replies[Math.min(Math.max(userCount(messages) - 1, 0), replies.length - 1)];
+}
+
+export const isBot = (value: string): value is Bot => value === 'explore' || value === 'interview' || value === 'essay' || value === 'mock';
 
 // 대화형. 챗봇 id가 있으면 스튜디오 챗봇, 키만 있으면 일반 모델 + 쿠키 지시문, 둘 다 없거나 상한·오류면 데모.
-export async function chat(bot: string, messages: Msg[], anon: string, systemHint?: string): Promise<ChatResult> {
+export async function chat(bot: Bot, messages: Msg[], anon: string, systemHint?: string): Promise<ChatResult> {
   const history = messages.filter((m) => m.role !== 'system');
-  if (!KEY()) return { bubbles: demoBubbles(history), demo: true, reason: 'no-key' };
-  if ((await usedToday()) >= CAP()) return { bubbles: demoBubbles(history), demo: true, reason: 'cap' };
+  if (!KEY()) return { bubbles: demoBubbles(bot, history), demo: true, reason: 'no-key' };
+  if ((await usedToday()) >= CAP()) return { bubbles: demoBubbles(bot, history), demo: true, reason: 'cap' };
   const chars = history.reduce((n, m) => n + m.content.length, 0);
   const model = MODEL();
   try {
@@ -86,7 +112,7 @@ export async function chat(bot: string, messages: Msg[], anon: string, systemHin
       ? await call(`/chatbots/${id}/chat/completions/`, { messages: history, stream: false })
       : await call('/chat/completions/', {
           model,
-          messages: [{ role: 'system', content: COOKIE_EXPLORE_SYSTEM + (systemHint ? `\n\n[화면 문맥] ${systemHint}` : '') }, ...history],
+          messages: [{ role: 'system', content: FALLBACK_SYSTEM[bot] + (systemHint ? `\n\n[화면 문맥] ${systemHint}` : '') }, ...history],
           temperature: 0.8,
           max_tokens: 1024,
         });
@@ -96,7 +122,7 @@ export async function chat(bot: string, messages: Msg[], anon: string, systemHin
     await record(credits, anon);
     return { bubbles: [content], credits, demo: false };
   } catch (e) {
-    return { bubbles: demoBubbles(history), demo: true, reason: (e as Error).message };
+    return { bubbles: demoBubbles(bot, history), demo: true, reason: (e as Error).message };
   }
 }
 
@@ -108,10 +134,10 @@ export async function completeJson<T>(
   name: string,
   anon: string,
   validate: (data: unknown) => T,
-  demoData: T,
+  demoValue: T,
 ): Promise<JsonResult<T>> {
-  if (!KEY()) return { data: demoData, demo: true, reason: 'no-key' };
-  if ((await usedToday()) >= CAP()) return { data: demoData, demo: true, reason: 'cap' };
+  if (!KEY()) return { data: demoValue, demo: true, reason: 'no-key' };
+  if ((await usedToday()) >= CAP()) return { data: demoValue, demo: true, reason: 'cap' };
   const model = MODEL();
   const chars = system.length + messages.reduce((n, m) => n + m.content.length, 0);
   let lastError = '';
@@ -135,5 +161,3 @@ export async function completeJson<T>(
   }
   throw new Error(lastError);
 }
-
-export const demoExtract = demo.result;

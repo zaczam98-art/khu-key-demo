@@ -1,8 +1,8 @@
-import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Character } from '../../components/Character';
 import { Icon } from '../../components/Icon';
 import { db } from '../../lib/db';
+import { useAsync } from '../../lib/hooks';
 import { useAppStore } from '../../store';
 
 // 1. 직무 탐색 시작
@@ -16,22 +16,18 @@ const SPARKLES = [
 export function ExploreStart() {
   const nav = useNavigate();
   const resetExplore = useAppStore((s) => s.resetExplore);
-  const [hasLog, setHasLog] = useState(false);
-
-  useEffect(() => {
-    db.chatLogs.get('log:explore').then((log) => setHasLog((log?.turns.length ?? 0) > 1));
-  }, []);
+  const { data: hasLog } = useAsync(async () => ((await db.chatLogs.get('log:explore'))?.turns.length ?? 0) > 1, []);
 
   const restart = async () => {
     await db.chatLogs.delete('log:explore');
     resetExplore();
-    nav('/explore/chat');
+    nav('/explore/chat', { viewTransition: true });
   };
 
   return (
-    <div className="flex flex-1 flex-col bg-gradient-to-b from-lavender via-canvas to-canvas px-5 pb-6 pt-[max(12px,env(safe-area-inset-top))]">
+    <div className="flex min-h-full flex-col bg-gradient-to-b from-lavender via-canvas to-canvas px-5 pb-6 pt-[max(12px,env(safe-area-inset-top))]">
       <div className="flex justify-end">
-        <Link to="/profile" className="press rounded-full bg-white/80 px-3 py-1 text-[13px] text-muted shadow-card">
+        <Link to="/profile" viewTransition className="press flex min-h-[36px] items-center rounded-full bg-surface/80 px-3 text-small text-muted shadow-card">
           건너뛰기
         </Link>
       </div>
@@ -42,14 +38,14 @@ export function ExploreStart() {
         <Character expr="smile" size={240} float />
       </div>
       <div className="card rise text-center" style={{ animationDelay: '120ms' }}>
-        <h1 className="text-[22px] font-bold text-ink">안녕! 나는 쿠키야 👋</h1>
-        <p className="mt-3 whitespace-pre-line text-[15px] leading-relaxed text-muted">{'너와 함께 딱 맞는 직무를\n찾아볼게.\n편하게 이야기해줘!'}</p>
-        <button type="button" onClick={() => nav('/explore/chat')} className="btn-primary mt-6 w-full">
+        <h1 className="text-title text-ink">안녕! 나는 쿠키야 👋</h1>
+        <p className="mt-3 whitespace-pre-line text-body text-muted">{'너와 함께 딱 맞는 직무를\n찾아볼게.\n편하게 이야기해줘!'}</p>
+        <button type="button" onClick={() => nav('/explore/chat', { viewTransition: true })} className="btn-primary mt-6 w-full">
           {hasLog ? '이어서 이야기하기' : '직무 탐색 시작하기'}
           <Icon name="arrow" size={18} />
         </button>
         {hasLog && (
-          <button type="button" onClick={() => void restart()} className="press mt-3 inline-flex items-center gap-1 text-[13px] text-muted underline">
+          <button type="button" onClick={() => void restart()} className="btn-ghost mt-2 w-full">
             <Icon name="refresh" size={14} />
             대화 기록을 지우고 새로 시작
           </button>

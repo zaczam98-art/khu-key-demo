@@ -30,6 +30,23 @@ export interface Experience {
   createdAt: string;
 }
 export type Stage = '관심' | '작성중' | '제출' | '서류합격' | '서류불합격' | '면접' | '최종';
+export const STAGES: Stage[] = ['관심', '작성중', '제출', '서류합격', '서류불합격', '면접', '최종'];
+export type QuestionStatus = '미작성' | '작성중' | '완료';
+export interface EssayVersion {
+  ver: number;
+  body: string;
+  model: string;
+  createdAt: string;
+}
+export interface EssayQuestion {
+  qid: string;
+  text: string;
+  limit: number;
+  expIds: string[];
+  status: QuestionStatus;
+  versions: EssayVersion[];
+  feedback?: string;
+}
 export interface Application {
   id: string;
   company: string;
@@ -40,21 +57,15 @@ export interface Application {
   values?: string;
   deadline?: string;
   stage: Stage;
-  questions: {
-    qid: string;
-    text: string;
-    limit: number;
-    expIds: string[];
-    status: string;
-    versions: { ver: number; body: string; model: string; createdAt: string }[];
-    feedback?: string;
-  }[];
+  questions: EssayQuestion[];
   checklist: { item: string; done: boolean }[];
 }
+export type TaskType = '자소서' | '서류제출' | '인적성' | '면접' | '기타';
+export const TASK_TYPES: TaskType[] = ['자소서', '서류제출', '인적성', '면접', '기타'];
 export interface Task {
   id: string;
   appId?: string;
-  type: '자소서' | '서류제출' | '인적성' | '면접' | '기타';
+  type: TaskType;
   title: string;
   dueAt: string;
   estMin: number;
@@ -62,14 +73,16 @@ export interface Task {
   priority: number;
   lastNudgedAt?: string;
 }
+export type InterviewType = '실무' | '임원' | 'PT' | 'AI화상';
 export interface MockSession {
   id: string;
   appId?: string;
   mode: 'text' | 'voice';
-  type: '실무' | '임원' | 'PT' | 'AI화상';
+  type: InterviewType;
   turns: { n: number; kind: '기본' | '꼬리'; q: string; basis: string; a: string; audioSec?: number }[];
   scores: { logic: number; jobFit: number; concreteness: number; delivery: number };
   evidence: { item: string; quote: string; comment: string }[];
+  summary?: string;
   createdAt: string;
 }
 export type ChatTurn = { role: 'user' | 'assistant'; content: string; at: string };
@@ -101,3 +114,8 @@ class KhuKeyDB extends Dexie {
 }
 
 export const db = new KhuKeyDB();
+
+// 체험·시연을 처음부터 다시 하기 위한 초기화. 프로필까지 지웁니다.
+export async function clearAllData(): Promise<void> {
+  await Promise.all([db.profile.clear(), db.experiences.clear(), db.applications.clear(), db.tasks.clear(), db.mockSessions.clear(), db.chatLogs.clear()]);
+}
