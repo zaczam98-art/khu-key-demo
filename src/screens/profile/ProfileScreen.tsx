@@ -1,18 +1,22 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { PageTitle } from '../../components/Header';
-import { Icon } from '../../components/Icon';
+import { Icon, type IconName } from '../../components/Icon';
 import { SettingsSheet } from '../../components/SettingsSheet';
 import { Badge, EmptyState, SectionTitle } from '../../components/ui';
 import { findJob } from '../../data/jobs';
+import { setBuild } from '../../lib/build';
 import { db } from '../../lib/db';
 import { periodLabel, topSkills } from '../../lib/experience';
 import { useAsync } from '../../lib/hooks';
+import { CATEGORY_ICON } from './BuildCategories';
 
-// 프로필 허브: 관심 직무(1단계), 경험 카드와 종합 분석(2단계)
+// 프로필 허브: 경험 카드, 종합 분석(강점), 관심 직무. 카드가 없으면 프로필 구축 마법사로 안내합니다.
 const BADGE = { 상: 'solid', 중: 'soft', 하: 'line' } as const;
+const STRENGTH_ICONS: IconName[] = ['briefcase', 'target', 'people', 'award', 'sparkle'];
 
 export function ProfileScreen() {
+  const nav = useNavigate();
   const [settings, setSettings] = useState(false);
   const { data, loading } = useAsync(async () => {
     const [profile, experiences] = await Promise.all([db.profile.get('me'), db.experiences.orderBy('createdAt').reverse().toArray()]);
@@ -21,6 +25,10 @@ export function ProfileScreen() {
   const profile = data?.profile;
   const cards = data?.experiences ?? [];
   const skills = topSkills(cards);
+  const addCard = () => {
+    setBuild({ categories: [], index: 0 });
+    nav('/profile/build/categories', { viewTransition: true });
+  };
 
   return (
     <div className="flex min-h-full flex-col px-4 pb-6 pt-[max(12px,env(safe-area-inset-top))]">
@@ -44,21 +52,26 @@ export function ProfileScreen() {
         <section className="mt-4">
           <SectionTitle
             right={
-              <Link to="/profile/experience/new" viewTransition className="btn-ghost -mr-3 text-primary">
-                <Icon name="plus" size={16} />
-                카드 추가
-              </Link>
+              cards.length ? (
+                <button type="button" onClick={addCard} className="btn-ghost -mr-3 text-primary">
+                  <Icon name="plus" size={16} />
+                  카드 추가
+                </button>
+              ) : null
             }
           >
             경험 카드 {cards.length ? <span className="text-muted">{cards.length}</span> : null}
           </SectionTitle>
           {cards.length === 0 ? (
-            <EmptyState expr="wink" title="아직 경험 카드가 없어" desc={'쿠키와 10분만 이야기하면\n경험 하나가 카드로 정리돼.'} action={{ label: '첫 카드 만들기', to: '/profile/experience/new' }} />
+            <EmptyState expr="wink" title="아직 경험 카드가 없어" desc={'쿠키와 10분만 이야기하면\n경험이 카드로 정리되고 강점까지 나와.'} action={{ label: '프로필 구축 시작하기', to: '/profile/build' }} />
           ) : (
             <ul className="space-y-2">
               {cards.map((c, i) => (
                 <li key={c.id}>
                   <Link to={`/profile/experience/${c.id}`} viewTransition className="card rise press flex items-center gap-3 !p-4" style={{ animationDelay: `${i * 70}ms` }}>
+                    <span className="tile bg-lavender text-primary">
+                      <Icon name={CATEGORY_ICON[c.category]} size={22} />
+                    </span>
                     <span className="min-w-0 flex-1">
                       <span className="flex items-center gap-2">
                         <Badge tone="soft">{c.category}</Badge>
@@ -78,8 +91,33 @@ export function ProfileScreen() {
 
       {!loading && cards.length > 0 && (
         <section className="card rise mt-4" style={{ animationDelay: '200ms' }}>
-          <SectionTitle>종합 분석</SectionTitle>
-          <p className="text-small text-muted">카드 {cards.length}개에서 자주 드러난 역량이야.</p>
+          <SectionTitle
+            right={
+              <Link to="/profile/build/analysis" viewTransition className="btn-ghost -mr-3 text-primary">
+                <Icon name="refresh" size={14} />
+                다시 분석
+              </Link>
+            }
+          >
+            종합 분석
+          </SectionTitle>
+          {profile?.strengthDetails?.length ? (
+            <ul className="space-y-3">
+              {profile.strengthDetails.map((s, i) => (
+                <li key={s.title} className="flex items-start gap-3">
+                  <span className="tile h-10 w-10 bg-lavender text-primary">
+                    <Icon name={STRENGTH_ICONS[i % STRENGTH_ICONS.length]} size={20} />
+                  </span>
+                  <span className="min-w-0">
+                    <span className="block text-body font-semibold text-ink">{s.title}</span>
+                    <span className="block text-small text-muted">{s.desc}</span>
+                  </span>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className="text-small text-muted">카드 {cards.length}개에서 자주 드러난 역량이야. "다시 분석"을 누르면 쿠키가 강점을 정리해 줘.</p>
+          )}
           <div className="mt-3 flex flex-wrap gap-2">
             {skills.map((s, i) => (
               <span key={s.skill} className="pop inline-flex items-center gap-1 rounded-full bg-lavender px-3 py-1.5 text-small text-primary" style={{ animationDelay: `${250 + i * 60}ms` }}>
@@ -88,16 +126,6 @@ export function ProfileScreen() {
               </span>
             ))}
           </div>
-          {profile?.strengths.length ? (
-            <ul className="mt-4 space-y-1.5 border-t border-line pt-4">
-              {profile.strengths.map((s) => (
-                <li key={s} className="flex items-start gap-2 text-small text-ink">
-                  <Icon name="check" size={16} className="mt-0.5 shrink-0 text-primary" strokeWidth={2.5} />
-                  {s}
-                </li>
-              ))}
-            </ul>
-          ) : null}
         </section>
       )}
 

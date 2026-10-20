@@ -9,7 +9,7 @@ import { periodLabel } from '../../lib/experience';
 import type { ExperienceCard } from '../../lib/schema';
 import { useAppStore } from '../../store';
 
-// 경험 카드 4. 저장된 카드 보기·고치기·지우기
+// 저장된 경험 카드 보기·고치기·지우기
 export function ExperienceDetail() {
   const nav = useNavigate();
   const { id = '' } = useParams();
@@ -64,7 +64,6 @@ export function ExperienceDetail() {
     <div className="flex min-h-full flex-col bg-canvas">
       <TitleHeader
         title="경험 카드"
-        back="/profile"
         right={
           !editing ? (
             <button type="button" aria-label="고치기" onClick={startEdit} className="press flex h-11 w-11 items-center justify-center rounded-full text-ink">
@@ -105,13 +104,13 @@ export function ExperienceDetail() {
               <div className="rise mt-3 flex flex-wrap gap-1.5" style={{ animationDelay: '180ms' }}>
                 {card.skills.map((s) => (
                   <span key={s} className="tag">
-                    {s}
+                    #{s}
                   </span>
                 ))}
               </div>
             )}
             <div className="rise" style={{ animationDelay: '240ms' }}>
-              <Section title="한 일" items={card.activities} />
+              <Section title="주요 활동" items={card.activities} />
               <Section title="성과" items={card.achievements} />
               <Section title="배운 점" items={card.learned} />
             </div>

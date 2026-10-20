@@ -1,19 +1,20 @@
 import { useEffect, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import { Character } from '../../components/Character';
 import { TitleHeader } from '../../components/Header';
 import { Icon } from '../../components/Icon';
-import { Badge, EmptyState, ScoreBar, SectionTitle } from '../../components/ui';
+import { Badge, EmptyState } from '../../components/ui';
 import { RUBRIC } from '../../data/rubric';
 import { scoreInterview, toMsgs } from '../../lib/api';
 import { db, type MockSession as Session } from '../../lib/db';
 import { formatDate } from '../../lib/dday';
 import { nowIso, uid } from '../../lib/ids';
 import { useAppStore } from '../../store';
-import { readMockSetup } from './MockSession';
+import { readMockSetup } from './MockSetup';
 
-// 면접 결과. /mock/result 는 방금 끝난 대화를 채점해 저장하고, /mock/:id 는 저장된 결과를 보여 줍니다.
-const avg = (s: Session['scores']) => Math.round((s.logic + s.jobFit + s.concreteness + s.delivery) / 4);
+// 면접 8. 면접 종료 및 결과 요약. /mock/result 는 방금 끝난 대화를 채점해 저장하고 /mock/:id 로 바꿉니다.
+export const avgScore = (s: Session['scores']) => Math.round((s.logic + s.jobFit + s.concreteness + s.delivery) / 4);
+const DOT = ['bg-success', 'bg-info', 'bg-warn', 'bg-primary'];
 
 export function MockResult() {
   const nav = useNavigate();
@@ -22,7 +23,6 @@ export function MockResult() {
   const [session, setSession] = useState<Session | null | undefined>(undefined);
   const [error, setError] = useState<string | null>(null);
   const [attempt, setAttempt] = useState(0);
-  const [showTranscript, setShowTranscript] = useState(false);
 
   useEffect(() => {
     let alive = true;
@@ -41,17 +41,30 @@ export function MockResult() {
       }
       const setup = readMockSetup();
       try {
-        const r = await scoreInterview(toMsgs(turns), setup.type, setup.job);
+        const r = await scoreInterview(toMsgs(turns), setup.type, setup.job, setup.company);
         if (!alive) return;
         note(r.demo, r.credits);
-        // 질문-답변 쌍으로 묶습니다. 첫 질문은 기본, 그 뒤는 꼬리 질문입니다.
         const pairs: Session['turns'] = [];
         let pendingQ = '';
         for (const t of turns) {
           if (t.role === 'assistant') pendingQ = t.content;
-          else pairs.push({ n: pairs.length + 1, kind: pairs.length === 0 ? '기본' : '꼬리', q: pendingQ, basis: '', a: t.content });
+          else pairs.push({ n: pairs.length + 1, kind: pendingQ.includes('-') ? '꼬리' : '기본', q: pendingQ, basis: '', a: t.content });
         }
-        const created: Session = { id: uid(), appId: setup.appId, mode: 'text', type: setup.type, turns: pairs, scores: r.result.scores, evidence: r.result.evidence, summary: r.result.summary, createdAt: nowIso() };
+        const created: Session = {
+          id: uid(),
+          appId: setup.appId,
+          company: setup.company,
+          job: setup.job,
+          mode: 'voice',
+          type: setup.type,
+          focus: setup.focus,
+          turns: pairs,
+          scores: r.result.scores,
+          evidence: r.result.evidence,
+          summary: r.result.summary,
+          details: r.result.perQuestion,
+          createdAt: nowIso(),
+        };
         await db.mockSessions.add(created);
         await db.chatLogs.delete('log:mock');
         setSession(created);
@@ -100,83 +113,58 @@ export function MockResult() {
       </div>
     );
 
-  const total = avg(session.scores);
+  const total = avgScore(session.scores);
+  const C = 2 * Math.PI * 44;
   return (
     <div className="flex min-h-full flex-col bg-canvas">
-      <TitleHeader title="면접 결과" back="/mock" />
-      <div className="flex-1 px-4 pb-8 pt-2">
-        <div className="rise flex items-center gap-4">
-          <div className="relative flex h-24 w-24 items-center justify-center">
-            <svg width="96" height="96" viewBox="0 0 96 96" className="absolute inset-0 -rotate-90">
-              <circle cx="48" cy="48" r="40" fill="none" className="stroke-lavender" strokeWidth="8" />
-              <circle cx="48" cy="48" r="40" fill="none" className="stroke-primary transition-[stroke-dashoffset] duration-slow ease-app" strokeWidth="8" strokeLinecap="round" strokeDasharray={2 * Math.PI * 40} strokeDashoffset={2 * Math.PI * 40 * (1 - total / 100)} />
-            </svg>
-            <span className="text-display tabular-nums text-ink">{total}</span>
+      <TitleHeader title="면접이 완료되었어요!" back="/mock" />
+      <div className="flex-1 px-4 pb-8 pt-1">
+        <div className="relative flex items-center justify-between">
+          <div className="relative">
+            <Icon name="sparkle" size={18} className="pop absolute -left-3 top-0 text-warn/70" style={{ animationDelay: '0.3s' }} />
+            <Icon name="sparkle" size={14} className="pop absolute right-0 top-6 text-primary/60" style={{ animationDelay: '0.6s' }} />
+            <Character expr="smile" size={150} float className="pop" />
           </div>
-          <div>
-            <div className="flex items-center gap-2">
-              <span className="text-heading text-ink">{session.type} 면접</span>
-              <Badge tone="line">{session.turns.length}문항</Badge>
-            </div>
-            <p className="mt-1 text-small text-muted">{formatDate(session.createdAt)}</p>
+          <div className="relative flex h-28 w-28 items-center justify-center">
+            <svg width="112" height="112" viewBox="0 0 112 112" className="absolute inset-0 -rotate-90">
+              <circle cx="56" cy="56" r="44" fill="none" className="stroke-lavender" strokeWidth="9" />
+              <circle cx="56" cy="56" r="44" fill="none" className="stroke-primary transition-[stroke-dashoffset] duration-slow ease-app" strokeWidth="9" strokeLinecap="round" strokeDasharray={C} strokeDashoffset={C * (1 - total / 100)} />
+            </svg>
+            <span className="flex items-baseline gap-0.5">
+              <span className="text-display tabular-nums text-ink">{total}</span>
+              <span className="text-caption text-muted">/100</span>
+            </span>
           </div>
         </div>
+        <div className="mt-1 flex items-center gap-2">
+          <span className="text-heading text-ink">
+            {session.company ? `${session.company} ` : ''}
+            {session.type} 면접
+          </span>
+          <Badge tone="line">{session.turns.length}문항</Badge>
+          <span className="text-caption text-muted">{formatDate(session.createdAt)}</span>
+        </div>
 
-        <div className="card rise mt-5 space-y-4" style={{ animationDelay: '120ms' }}>
+        <div className="card rise mt-4 grid grid-cols-2 gap-x-4 gap-y-3" style={{ animationDelay: '120ms' }}>
           {RUBRIC.map((r, i) => (
-            <ScoreBar key={r.key} label={r.label} value={session.scores[r.key]} delay={200 + i * 90} />
+            <div key={r.key} className="flex items-center gap-2">
+              <span className={`h-2.5 w-2.5 shrink-0 rounded-full ${DOT[i]}`} />
+              <span className="flex-1 text-small text-ink">{r.label}</span>
+              <span className="text-body font-semibold tabular-nums text-ink">{session.scores[r.key]}</span>
+            </div>
           ))}
         </div>
 
-        {session.summary && (
-          <div className="rise mt-5 flex items-start gap-3" style={{ animationDelay: '500ms' }}>
-            <Character expr="smile" size={44} className="shrink-0 rounded-full bg-lavender" />
-            <div className="bubble-bot">{session.summary}</div>
-          </div>
-        )}
-
-        <section className="mt-6">
-          <SectionTitle>근거</SectionTitle>
-          <ul className="space-y-3">
-            {session.evidence.map((e, i) => (
-              <li key={i} className="card rise !p-4" style={{ animationDelay: `${560 + i * 80}ms` }}>
-                <Badge tone="soft">{e.item}</Badge>
-                {e.quote && (
-                  <p className="mt-2 flex gap-2 text-small text-muted">
-                    <Icon name="quote" size={14} className="mt-0.5 shrink-0" />
-                    <span className="italic">{e.quote}</span>
-                  </p>
-                )}
-                <p className="mt-2 text-[0.875rem] leading-relaxed text-ink">{e.comment}</p>
-              </li>
-            ))}
-          </ul>
+        <section className="rise mt-5" style={{ animationDelay: '240ms' }}>
+          <h2 className="section-title">전반적인 평가</h2>
+          <p className="mt-2 text-[0.875rem] leading-relaxed text-ink">{session.summary}</p>
         </section>
 
-        <button type="button" onClick={() => setShowTranscript((v) => !v)} className="btn-ghost mt-5 w-full">
-          <Icon name={showTranscript ? 'chevron-down' : 'history'} size={16} />
-          대화 {showTranscript ? '접기' : '다시 보기'}
-        </button>
-        {showTranscript && (
-          <ol className="mt-2 space-y-3">
-            {session.turns.map((t) => (
-              <li key={t.n} className="card !p-4">
-                <p className="flex items-center gap-2 text-caption text-muted">
-                  <Badge tone="line">{t.kind}</Badge>Q{t.n}
-                </p>
-                <p className="mt-1 text-small text-ink">{t.q}</p>
-                <p className="mt-2 rounded-tile bg-canvas p-3 text-small text-ink">{t.a}</p>
-              </li>
-            ))}
-          </ol>
-        )}
-
-        <div className="mt-8 flex gap-3">
-          <button type="button" onClick={() => nav('/', { viewTransition: true })} className="btn-secondary flex-1">
-            홈으로
-          </button>
-          <button type="button" onClick={() => nav('/mock', { viewTransition: true })} className="btn-primary flex-1">
-            <Icon name="refresh" size={18} />
+        <div className="mt-6 flex gap-3">
+          <Link to={`/mock/${session.id}/detail`} viewTransition className="btn-secondary flex-1">
+            상세 피드백 보기
+          </Link>
+          <button type="button" onClick={() => nav('/mock/setup', { viewTransition: true })} className="btn-primary flex-1">
             다시 연습하기
           </button>
         </div>

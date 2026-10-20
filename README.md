@@ -9,12 +9,11 @@
 
 ## 지금 상태 (2026-10-20)
 
-- 모듈 5개의 틀이 모두 있습니다. 홈·일정·알림, 직무 탐색(10화면, 결과 이미지 카드), 프로필 구축(경험 카드), 자소서(공고 가져오기, 문항별 초안·버전·피드백), 모의 면접(텍스트, 채점 기준표와 근거).
-- ChatKHU 키와 챗봇 id가 없으면 전부 체험 모드로 돌아갑니다. 대화는 `server/demo/*.json` 대본으로, 추출·초안·채점은 같은 파일의 예시 결과로 재생되고, 추천 답변이 칩으로 나와 타자 없이 넘길 수 있습니다.
-- 디자인: CSS 변수 토큰(밝게·어둡게), 글자 6단계, Lucide 아이콘, 모션 토큰, 화면 전환(View Transitions), 데스크톱 폰 프레임, 첫 진입 닉네임, 공용 토스트·시트·빈 상태.
+- 시안 4장(`design/`)의 40화면이 모두 들어 있습니다. 직무 탐색 10화면, 프로필 구축 10화면(분류 복수 선택 → 인터뷰 → 카드 → 종합 분석 → 미리보기), 자소서 10화면(대화 시작 → 공고 분석 → 경험 매칭·보완 → 초안·첨삭 탭 → 제출 → 다음 단계), 면접 10화면(4갈래 시작 → 설정 → 음성 세션 → 결과 → 상세 피드백 → 합격 엔딩), 그리고 홈·일정·알림.
+- ChatKHU 키와 챗봇 id가 없으면 전부 체험 모드로 돌아갑니다. 대화는 `server/demo/*.json` 대본, 추출·초안·채점·분석은 같은 파일의 예시 결과로 재생되고, 추천 답변이 칩으로 나와 타자 없이 넘길 수 있습니다. 면접의 받아쓰기도 대본 답변으로 대체되고, 질문 읽어 주기는 브라우저 음성으로 됩니다.
+- 디자인: CSS 변수 토큰(밝게·어둡게), 글자 6단계, Lucide 아이콘, 모션 토큰, 화면 전환(View Transitions), 데스크톱 폰 프레임, 첫 진입 닉네임, 공유 카드, 공용 토스트·시트·빈 상태.
 - 체험 모드 배포: https://zaczam98-art.github.io/khu-key-demo/ (서버 없음, main에 합쳐지면 자동 배포)
-- 비어 있는 자리는 둘입니다. `.env.local`의 ChatKHU 키·챗봇 id 4개, 그리고 `public/char/{default,smile,think,wink,suit,heart}.png` 캐릭터 이미지(지금은 자리표시).
-- 직무 탐색 외 모듈은 시안 PNG가 아직 없어 CLAUDE.md의 데이터 모델과 제품 설명대로 만들었습니다. 시안이 오면 화면을 맞춥니다.
+- 비어 있는 자리는 둘입니다. `.env.local`의 ChatKHU 키·챗봇 id 4개(STT·TTS도 같은 키), 그리고 `public/char/{default,smile,think,wink,suit,heart}.png` 캐릭터 이미지(지금은 자리표시).
 
 ## 실행
 
@@ -29,7 +28,7 @@ pnpm dev                     # 같은 와이파이의 폰에서는 터미널에 
 상위 폴더 이름에 `;`가 있으면 `pnpm dev`가 vite를 못 찾을 수 있습니다. 그때는 `node node_modules/vite/bin/vite.js --host`로 직접 실행합니다.
 
 ```bash
-pnpm test     # 규칙 함수·직무 사전·D-day·선제 메시지 테스트 (vitest)
+pnpm test     # 규칙 함수·직무 사전·D-day·선제 메시지·경험 추천 테스트 (vitest)
 pnpm build    # tsc 검사 + vite 빌드
 ```
 
@@ -43,16 +42,17 @@ pnpm build    # tsc 검사 + vite 빌드
 CHATKHU_API_KEY=            # API Gateway 화면에서 발급한 키
 CHATKHU_BOT_EXPLORE=        # 직무 탐색 챗봇 id
 CHATKHU_BOT_INTERVIEW=      # 경험 인터뷰 챗봇 id
+CHATKHU_BOT_ESSAY=          # 자소서 시작 대화 챗봇 id
 CHATKHU_BOT_MOCK=           # 면접관 챗봇 id
 ```
 
-챗봇 id가 비어 있으면 키만으로 일반 모델에 `server/prompts/`의 지시문을 붙여 대화합니다. 스튜디오 챗봇에 넣을 지시문과 이벤트 규약은 `docs/prompts.md`에 있습니다. 브라우저 코드에는 키가 들어가지 않고, 호출은 전부 `server/lib/chatkhu.ts`를 거칩니다.
+챗봇 id가 비어 있으면 키만으로 일반 모델에 `server/prompts/`의 지시문을 붙여 대화합니다. 스튜디오 챗봇에 넣을 지시문과 이벤트 규약은 `docs/prompts.md`에 있습니다. 브라우저 코드에는 키가 들어가지 않고, 호출은 전부 `server/lib/chatkhu.ts`를 거칩니다. 면접의 STT·TTS 요청 형식은 OpenAI 호환으로 가정했고 키를 받은 뒤 실측해 `docs/chatkhu-api.md`에 적습니다.
 
 ## 협업
 
 - 할 일은 GitHub 이슈 "작업" 양식으로 적습니다(라벨 `ai-ready`). 이슈 1개 = 브랜치 1개 = PR 1개입니다.
 - PR을 열면 `ci.yml`이 테스트와 빌드를 돌리고, main에 합쳐지면 `deploy.yml`이 Pages에 올립니다.
-- 결정은 `docs/decisions.md`에, 지시문 변경은 `docs/prompts.md`에 덧붙입니다.
+- 결정은 `docs/decisions.md`에, 지시문 변경은 `docs/prompts.md`에 덧붙입니다. 화면 문구는 `design/copy.md`가 기준입니다.
 
 ## 배포
 
@@ -62,13 +62,13 @@ CHATKHU_BOT_MOCK=           # 면접관 챗봇 id
 ## 폴더
 
 ```
-api/            Vercel Functions: chat/[bot], extract, extract-experience, extract-post, essay-draft, score, job-post, push
-server/         lib/chatkhu.ts(호출 한 곳), prompts/(지시문 8종), demo/(체험 대본 4종), dev-api.ts(로컬 /api)
-src/components  ChatShell, Character, Header, TabBar, Icon(Lucide), ui(시트·배지·빈 상태 등), Toast, InstallBanner, SettingsSheet, ExperienceForm
-src/screens     home(홈·일정·닉네임), explore(10화면+사전 상세), profile(경험 카드 4화면), essay(4화면), mock(3화면)
-src/lib         db(Dexie), schema(zod+JSON 스키마), api, mask, events, dday, nudge, experience, profile, push, theme, shareCard, hooks
+api/            Vercel Functions: chat/[bot], extract, extract-experience, analyze-profile, extract-post, essay-draft, score, job-post, stt, tts, push
+server/         lib/chatkhu.ts(호출 한 곳), prompts/(지시문 10종), demo/(체험 대본 4종), dev-api.ts(로컬 /api)
+src/components  ChatShell, Character, Header, TabBar, Icon(Lucide), ui, Toast, InstallBanner, SettingsSheet, ExperienceForm, Splash
+src/screens     home(홈·일정·닉네임), explore(10화면), profile(구축 마법사 10화면 + 카드 상세), essay(시작·목록·추가·상세·문항·다음 단계), mock(시작·설정·세션·결과·상세·기록·엔딩)
+src/lib         db, schema, api, mask, events, dday, nudge, experience, essay, build, profile, push, voice, wav, theme, shareCard, hooks
 src/data        jobs.ts 직무 사전 30개, rubric.ts 면접 채점 기준표
-design/         시안 PNG, copy.md
+design/         시안 PNG 4장, copy.md
 docs/           chatkhu-api.md, prompts.md, decisions.md, roadmap.md
 .github/        이슈·PR 템플릿, ci.yml(PR 검사), deploy.yml(Pages)
 ```

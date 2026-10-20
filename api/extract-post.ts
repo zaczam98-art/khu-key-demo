@@ -1,4 +1,4 @@
-// POST /api/extract-post  { text } -> { result: {keywords, values, deadline, questions}, credits?, demo }
+// POST /api/extract-post  { text } -> { result: {summary, keywords, values, deadline, questions}, credits?, demo }
 import { completeJson, demoData } from '../server/lib/chatkhu';
 import { json } from '../server/lib/http';
 import { POST_EXTRACT_SYSTEM } from '../server/prompts/post-extract';
@@ -9,6 +9,7 @@ export async function POST(req: Request): Promise<Response> {
   const text = (body?.text ?? '').trim().slice(0, 12_000);
   if (!text) return json({ error: 'text required' }, 400);
   const anon = req.headers.get('x-anon-id') ?? 'anon';
+  const { summary, keywords, values, deadline, questions } = demoData.post;
   try {
     const r = await completeJson<PostExtract>(
       POST_EXTRACT_SYSTEM,
@@ -17,7 +18,7 @@ export async function POST(req: Request): Promise<Response> {
       'post_extract',
       anon,
       (data) => PostExtractSchema.parse(data),
-      PostExtractSchema.parse({ keywords: demoData.post.keywords, values: demoData.post.values, deadline: demoData.post.deadline, questions: demoData.post.questions }),
+      PostExtractSchema.parse({ summary, keywords, values, deadline, questions }),
     );
     return json({ result: r.data, credits: r.credits, demo: r.demo });
   } catch (e) {

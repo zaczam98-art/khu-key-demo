@@ -8,11 +8,13 @@ import {
   ExperienceCardSchema,
   ExploreResultSchema,
   PostExtractSchema,
+  ProfileAnalysisSchema,
   ScoreSchema,
   type EssayDraft,
   type ExperienceCard,
   type ExploreResult,
   type PostExtract,
+  type ProfileAnalysis,
   type ScoreResult,
 } from './schema';
 
@@ -42,12 +44,8 @@ function anonId(): string {
 
 const wait = (ms: number) => new Promise<void>((resolve) => setTimeout(resolve, ms));
 
-async function post<T>(path: string, body: unknown): Promise<T> {
-  const r = await fetch(path, {
-    method: 'POST',
-    headers: { 'content-type': 'application/json', 'x-anon-id': anonId() },
-    body: JSON.stringify(body),
-  });
+async function request(path: string, init: RequestInit): Promise<Response> {
+  const r = await fetch(path, { ...init, headers: { ...(init.headers as Record<string, string>), 'x-anon-id': anonId() } });
   if (!r.ok) {
     const detail = await r
       .json()
@@ -55,26 +53,27 @@ async function post<T>(path: string, body: unknown): Promise<T> {
       .catch(() => undefined);
     throw new HttpError(r.status, detail);
   }
-  return (await r.json()) as T;
+  return r;
 }
+const post = async <T,>(path: string, body: unknown): Promise<T> =>
+  (await request(path, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) })).json() as Promise<T>;
 
-// 우리 서버가 실제로 실패한 경우(500번대)만 "다시 시도"로 안내합니다.
-// 서버가 없는 GitHub Pages(404, 405)나 네트워크 오류는 체험 모드로 돌아갑니다.
+// 우리 서버가 실제로 실패한 경우(500번대, 400)만 안내하고, 서버가 없는 GitHub Pages(404, 405)나 네트워크 오류는 체험 모드로 돌아갑니다.
+const isNoServer = (e: unknown) => !(e instanceof HttpError) || e.status === 404 || e.status === 405;
 async function postOrDemo<T>(path: string, body: unknown, validate: (d: unknown) => T, demo: () => T, demoDelay: number, failMessage: string): Promise<Wrapped<T>> {
   try {
     const r = await post<{ result: unknown; credits?: number; demo?: boolean }>(path, body);
     return { result: validate(r.result), credits: r.credits, demo: !!r.demo };
   } catch (e) {
-    if (e instanceof HttpError && e.status >= 500) throw new Error(e.detail || failMessage);
-    if (e instanceof HttpError && e.status === 400) throw new Error(e.detail || failMessage);
+    if (!isNoServer(e)) throw new Error((e as HttpError).detail || failMessage);
     await wait(demoDelay);
     return { result: demo(), demo: true };
   }
 }
 
 // ---------- 대화 ----------
-const DEMO_REPLIES: Record<Bot, string[][]> = { explore: exploreDemo.replies, interview: interviewDemo.replies, essay: interviewDemo.replies, mock: mockDemo.replies };
-const DEMO_SCRIPT: Record<Bot, string[]> = { explore: exploreDemo.userScript, interview: interviewDemo.userScript, essay: interviewDemo.userScript, mock: mockDemo.userScript };
+const DEMO_REPLIES: Record<Bot, string[][]> = { explore: exploreDemo.replies, interview: interviewDemo.replies, essay: essayDemo.replies, mock: mockDemo.replies };
+const DEMO_SCRIPT: Record<Bot, string[]> = { explore: exploreDemo.userScript, interview: interviewDemo.userScript, essay: essayDemo.userScript, mock: mockDemo.userScript };
 const userCount = (messages: Msg[]) => messages.filter((m) => m.role === 'user').length;
 
 export function demoReply(bot: Bot, messages: Msg[]): string[] {
@@ -105,16 +104,20 @@ export const extractExperience = (messages: Msg[], category?: string) =>
     '/api/extract-experience',
     { messages, category },
     (d) => ExperienceCardSchema.parse(d),
-    () => ExperienceCardSchema.parse(category ? { ...interviewDemo.result, category } : interviewDemo.result),
+    () => ExperienceCardSchema.parse(interviewDemo.result),
     1800,
     '카드 정리에 실패했어요. 다시 시도해 주세요.',
   );
 
+export type CardSummary = Pick<Experience, 'title' | 'category' | 'role' | 'activities' | 'achievements' | 'learned' | 'skills'>;
+export const analyzeProfile = (cards: CardSummary[]) =>
+  postOrDemo<ProfileAnalysis>('/api/analyze-profile', { cards }, (d) => ProfileAnalysisSchema.parse(d), () => ProfileAnalysisSchema.parse(interviewDemo.analysis), 2200, '종합 분석에 실패했어요. 다시 시도해 주세요.');
+
 export async function fetchJobPost(url: string): Promise<{ text: string; demo: boolean }> {
   try {
-    return await post<{ text: string; demo: boolean }>('/api/job-post', { url });
+    return await (await request('/api/job-post', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ url }) })).json();
   } catch (e) {
-    if (e instanceof HttpError && e.status >= 400 && e.status !== 404 && e.status !== 405) throw new Error(e.detail || '공고를 가져오지 못했어요. 본문을 직접 붙여 넣어 주세요.');
+    if (!isNoServer(e)) throw new Error((e as HttpError).detail || '공고를 가져오지 못했어요. 본문을 직접 붙여 넣어 주세요.');
     await wait(900);
     return { text: essayDemo.post.text, demo: true };
   }
@@ -125,13 +128,16 @@ export const extractPost = (text: string) =>
     '/api/extract-post',
     { text },
     (d) => PostExtractSchema.parse(d),
-    () => PostExtractSchema.parse({ keywords: essayDemo.post.keywords, values: essayDemo.post.values, deadline: essayDemo.post.deadline, questions: essayDemo.post.questions }),
+    () => {
+      const { summary, keywords, values, deadline, questions } = essayDemo.post;
+      return PostExtractSchema.parse({ summary, keywords, values, deadline, questions });
+    },
     1500,
     '공고 분석에 실패했어요. 다시 시도해 주세요.',
   );
 
 export type DraftInput = {
-  mode: 'draft' | 'feedback';
+  mode: 'draft' | 'feedback' | 'revise';
   company: string;
   job: string;
   keywords: string[];
@@ -140,19 +146,48 @@ export type DraftInput = {
   limit: number;
   experiences: Pick<Experience, 'title' | 'role' | 'activities' | 'achievements' | 'learned' | 'skills'>[];
   body?: string;
+  points?: string[];
 };
 export const draftEssay = (input: DraftInput) =>
   postOrDemo<EssayDraft>(
     '/api/essay-draft',
     input,
     (d) => EssayDraftSchema.parse(d),
-    () => (input.mode === 'draft' ? EssayDraftSchema.parse(essayDemo.draft) : { body: input.body ?? '', feedback: essayDemo.feedback }),
+    () =>
+      EssayDraftSchema.parse(
+        input.mode === 'draft' ? essayDemo.draft : input.mode === 'revise' ? essayDemo.revise : { body: input.body ?? '', ...essayDemo.feedback },
+      ),
     2200,
-    '초안 작성에 실패했어요. 다시 시도해 주세요.',
+    '자소서 작업에 실패했어요. 다시 시도해 주세요.',
   );
 
-export const scoreInterview = (messages: Msg[], type: string, job?: string) =>
-  postOrDemo<ScoreResult>('/api/score', { messages, type, job }, (d) => ScoreSchema.parse(d), () => ScoreSchema.parse(mockDemo.result), 2400, '채점에 실패했어요. 다시 시도해 주세요.');
+export const scoreInterview = (messages: Msg[], type: string, job?: string, company?: string) =>
+  postOrDemo<ScoreResult>('/api/score', { messages, type, job, company }, (d) => ScoreSchema.parse(d), () => ScoreSchema.parse(mockDemo.result), 2400, '채점에 실패했어요. 다시 시도해 주세요.');
+
+// ---------- 음성 ----------
+export async function transcribeAudio(wav: Blob, turn: number): Promise<{ text: string; demo: boolean }> {
+  const form = new FormData();
+  form.append('file', wav, 'answer.wav');
+  form.append('turn', String(turn));
+  try {
+    return await (await request('/api/stt', { method: 'POST', body: form })).json();
+  } catch (e) {
+    if (!isNoServer(e)) throw new Error((e as HttpError).detail || '받아쓰기에 실패했어요. 글로 답해 주세요.');
+    await wait(1200);
+    return { text: mockDemo.userScript[Math.min(Math.max(turn, 0), mockDemo.userScript.length - 1)], demo: true };
+  }
+}
+
+// 서버 TTS 가 있으면 오디오를, 없으면 null 을 돌려줍니다(호출한 쪽이 브라우저 음성 합성으로 대체).
+export async function fetchSpeech(text: string): Promise<Blob | null> {
+  try {
+    const r = await request('/api/tts', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ text }) });
+    if (r.status === 204) return null;
+    return await r.blob();
+  } catch {
+    return null;
+  }
+}
 
 export async function savePushSubscription(subscription: PushSubscriptionJSON): Promise<{ ok: boolean; demo: boolean }> {
   try {

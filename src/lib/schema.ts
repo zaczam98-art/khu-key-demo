@@ -2,6 +2,8 @@ import { z } from 'zod';
 
 // ChatKHU 구조화 출력의 zod 검증과, response_format(json_schema, strict)에 보내는 JSON 스키마를 짝으로 둡니다.
 // strict 모드는 모든 속성이 required 이고 additionalProperties: false 여야 합니다.
+const strArr = { type: 'array', items: { type: 'string' } } as const;
+const num = { type: 'number' } as const;
 
 // ---------- 직무 탐색 (/api/extract) ----------
 export const JobSchema = z.object({
@@ -21,15 +23,15 @@ export const exploreResultJsonSchema = {
   additionalProperties: false,
   required: ['keywords', 'traits', 'jobs'],
   properties: {
-    keywords: { type: 'array', items: { type: 'string' } },
-    traits: { type: 'array', items: { type: 'string' } },
+    keywords: strArr,
+    traits: strArr,
     jobs: {
       type: 'array',
       items: {
         type: 'object',
         additionalProperties: false,
         required: ['name', 'summary', 'tags', 'why'],
-        properties: { name: { type: 'string' }, summary: { type: 'string' }, tags: { type: 'array', items: { type: 'string' } }, why: { type: 'string' } },
+        properties: { name: { type: 'string' }, summary: { type: 'string' }, tags: strArr, why: { type: 'string' } },
       },
     },
   },
@@ -49,7 +51,6 @@ export const ExperienceCardSchema = z.object({
   missing: z.array(z.string()).max(5),
 });
 export type ExperienceCard = z.infer<typeof ExperienceCardSchema>;
-const strArr = { type: 'array', items: { type: 'string' } } as const;
 export const experienceCardJsonSchema = {
   type: 'object',
   additionalProperties: false,
@@ -67,8 +68,25 @@ export const experienceCardJsonSchema = {
   },
 } as const;
 
+// ---------- 경험 종합 분석 (/api/analyze-profile) ----------
+export const ProfileAnalysisSchema = z.object({
+  strengths: z.array(z.object({ title: z.string().min(1), desc: z.string().min(1) })).min(2).max(5),
+  summary: z.string(),
+});
+export type ProfileAnalysis = z.infer<typeof ProfileAnalysisSchema>;
+export const profileAnalysisJsonSchema = {
+  type: 'object',
+  additionalProperties: false,
+  required: ['strengths', 'summary'],
+  properties: {
+    strengths: { type: 'array', items: { type: 'object', additionalProperties: false, required: ['title', 'desc'], properties: { title: { type: 'string' }, desc: { type: 'string' } } } },
+    summary: { type: 'string' },
+  },
+} as const;
+
 // ---------- 공고 분석 (/api/extract-post) ----------
 export const PostExtractSchema = z.object({
+  summary: z.string(),
   keywords: z.array(z.string().min(1)).min(1).max(10),
   values: z.string(),
   deadline: z.string().nullable(),
@@ -78,8 +96,9 @@ export type PostExtract = z.infer<typeof PostExtractSchema>;
 export const postExtractJsonSchema = {
   type: 'object',
   additionalProperties: false,
-  required: ['keywords', 'values', 'deadline', 'questions'],
+  required: ['summary', 'keywords', 'values', 'deadline', 'questions'],
   properties: {
+    summary: { type: 'string' },
     keywords: strArr,
     values: { type: 'string' },
     deadline: { type: ['string', 'null'] },
@@ -90,29 +109,49 @@ export const postExtractJsonSchema = {
   },
 } as const;
 
-// ---------- 자소서 초안·피드백 (/api/essay-draft) ----------
-export const EssayDraftSchema = z.object({ body: z.string().min(1), feedback: z.string() });
+// ---------- 자소서 초안·첨삭·전체 수정 (/api/essay-draft) ----------
+export const EssayDraftSchema = z.object({
+  body: z.string().min(1),
+  feedback: z.string(),
+  points: z.array(z.string()).max(6),
+  examples: z.array(z.object({ before: z.string(), after: z.string() })).max(4),
+});
 export type EssayDraft = z.infer<typeof EssayDraftSchema>;
 export const essayDraftJsonSchema = {
   type: 'object',
   additionalProperties: false,
-  required: ['body', 'feedback'],
-  properties: { body: { type: 'string' }, feedback: { type: 'string' } },
+  required: ['body', 'feedback', 'points', 'examples'],
+  properties: {
+    body: { type: 'string' },
+    feedback: { type: 'string' },
+    points: strArr,
+    examples: { type: 'array', items: { type: 'object', additionalProperties: false, required: ['before', 'after'], properties: { before: { type: 'string' }, after: { type: 'string' } } } },
+  },
 } as const;
 
 // ---------- 면접 채점 (/api/score) ----------
 const score = z.number().min(0).max(100);
+export const PerQuestionSchema = z.object({
+  n: z.number().int().min(1),
+  title: z.string().min(1),
+  score,
+  good: z.array(z.string()).max(4),
+  improve: z.array(z.string()).max(4),
+  suggest: z.array(z.string()).max(4),
+  model: z.string(),
+});
+export type PerQuestion = z.infer<typeof PerQuestionSchema>;
 export const ScoreSchema = z.object({
   scores: z.object({ logic: score, jobFit: score, concreteness: score, delivery: score }),
   evidence: z.array(z.object({ item: z.string().min(1), quote: z.string(), comment: z.string().min(1) })).min(1).max(8),
   summary: z.string(),
+  perQuestion: z.array(PerQuestionSchema).max(8),
 });
 export type ScoreResult = z.infer<typeof ScoreSchema>;
-const num = { type: 'number' } as const;
 export const scoreJsonSchema = {
   type: 'object',
   additionalProperties: false,
-  required: ['scores', 'evidence', 'summary'],
+  required: ['scores', 'evidence', 'summary', 'perQuestion'],
   properties: {
     scores: {
       type: 'object',
@@ -125,5 +164,14 @@ export const scoreJsonSchema = {
       items: { type: 'object', additionalProperties: false, required: ['item', 'quote', 'comment'], properties: { item: { type: 'string' }, quote: { type: 'string' }, comment: { type: 'string' } } },
     },
     summary: { type: 'string' },
+    perQuestion: {
+      type: 'array',
+      items: {
+        type: 'object',
+        additionalProperties: false,
+        required: ['n', 'title', 'score', 'good', 'improve', 'suggest', 'model'],
+        properties: { n: { type: 'integer' }, title: { type: 'string' }, score: num, good: strArr, improve: strArr, suggest: strArr, model: { type: 'string' } },
+      },
+    },
   },
 } as const;

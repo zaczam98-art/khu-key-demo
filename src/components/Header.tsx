@@ -3,26 +3,26 @@ import { useNavigate } from 'react-router-dom';
 import { Character, type Expr } from './Character';
 import { Icon } from './Icon';
 
-export function BackButton({ to }: { to?: string }) {
+export function BackButton({ to, close }: { to?: string; close?: boolean }) {
   const nav = useNavigate();
   return (
     <button
       type="button"
-      aria-label="뒤로"
+      aria-label={close ? '닫기' : '뒤로'}
       onClick={() => (to ? nav(to, { viewTransition: true }) : nav(-1))}
       className="press -ml-2 flex h-11 w-11 items-center justify-center rounded-full text-ink"
     >
-      <Icon name="back" size={24} />
+      <Icon name={close ? 'x' : 'back'} size={close ? 22 : 24} />
     </button>
   );
 }
 
-export function TitleHeader({ title, back, right }: { title: string; back?: string; right?: ReactNode }) {
+export function TitleHeader({ title, back, right, close }: { title: ReactNode; back?: string; right?: ReactNode; close?: boolean }) {
   return (
     <header className="sticky top-0 z-10 flex h-14 items-center bg-canvas/95 px-4 backdrop-blur">
-      <BackButton to={back} />
+      <BackButton to={back} close={close} />
       <h1 className="flex-1 text-center text-heading text-ink">{title}</h1>
-      <div className="flex w-11 justify-end">{right}</div>
+      <div className="flex min-w-[44px] justify-end">{right}</div>
     </header>
   );
 }
@@ -37,10 +37,10 @@ export function PageTitle({ title, right }: { title: string; right?: ReactNode }
   );
 }
 
-export function ChatHeader({ expr = 'default', name = '쿠키', back, online = true }: { expr?: Expr; name?: string; back?: string; online?: boolean }) {
+export function ChatHeader({ expr = 'default', name = '쿠키', back, online = true, noBack = false }: { expr?: Expr; name?: string; back?: string; online?: boolean; noBack?: boolean }) {
   return (
     <header className="sticky top-0 z-10 flex h-14 items-center gap-2 bg-canvas/95 px-4 backdrop-blur">
-      <BackButton to={back} />
+      {noBack ? <span className="w-2" /> : <BackButton to={back} />}
       <Character expr={expr} size={38} className="rounded-full bg-lavender transition-opacity duration-base" />
       <div className="leading-tight">
         <div className="text-body font-semibold text-ink">{name}</div>

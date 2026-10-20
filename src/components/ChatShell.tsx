@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState, type FormEvent, type KeyboardEvent, type UIEvent } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { chat as sendChat, demoSuggestion, toMsgs, type Bot } from '../lib/api';
 import { db, type ChatTurn } from '../lib/db';
 import { splitEvents, type BotEvent } from '../lib/events';
@@ -15,13 +16,17 @@ export type ChatShellProps = {
   intro?: string; // 서버 호출 없이 보여 주는 고정 첫 말풍선
   systemHint?: string;
   quickReplies?: string[];
+  quickActions?: { label: string; to: string }[]; // 보내는 대신 화면을 여는 칩 (첫 메시지 전까지)
   onEvent?: (event: BotEvent) => void;
   maxTurns?: number; // 이 수만큼 사용자 메시지가 쌓이면 마무리 칩을 보여 줍니다
   progress?: number; // 0~1
   back?: string;
+  title?: string;
   persona?: { name: string; expr: Expr }; // 면접관처럼 쿠키가 아닌 상대
   finishChip?: string; // 마무리 칩 문구
   finishEvent?: string; // 마무리 칩이 보낼 이벤트 이름
+  logKey?: string; // 로그 저장 키 (기본 log:<bot>)
+  noBack?: boolean; // 탭 첫 화면처럼 뒤로 가기가 없는 경우
 };
 
 const formatTime = (iso: string) => {
@@ -35,8 +40,8 @@ const closeInTime = (a: ChatTurn, b: ChatTurn) => Math.abs(new Date(a.at).getTim
 const bulletLines = (text?: string) =>
   (text ?? '')
     .split('\n')
-    .filter((line) => /^[-•]\s+/.test(line))
-    .map((line) => line.replace(/^[-•]\s+/, '').trim())
+    .filter((line) => /^[-]\s+/.test(line))
+    .map((line) => line.replace(/^[-]\s+/, '').trim())
     .slice(0, 4);
 
 // 새로 온 쿠키 말풍선을 글자 단위로 보여 줍니다. 실제 연결에서 스트리밍 응답을 붙일 때도 같은 자리입니다.
@@ -54,7 +59,6 @@ function TypedText({ text, onDone }: { text: string; onDone: () => void }) {
     const t = window.setInterval(() => setShown((n) => Math.min(n + step, text.length)), interval);
     return () => window.clearInterval(t);
   }, [text, done]);
-  // 상위 상태 변경은 렌더가 끝난 뒤 효과에서만 합니다.
   useEffect(() => {
     if (done) onDone();
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -62,23 +66,22 @@ function TypedText({ text, onDone }: { text: string; onDone: () => void }) {
   return <>{text.slice(0, shown)}</>;
 }
 
-export function ChatShell({ bot, intro, systemHint, quickReplies, onEvent, maxTurns = 9, progress, back, persona, finishChip, finishEvent = 'analyze' }: ChatShellProps) {
-  const logId = `log:${bot}`;
+export function ChatShell({ bot, intro, systemHint, quickReplies, quickActions, onEvent, maxTurns = 9, progress, back, title, persona, finishChip, finishEvent = 'analyze', logKey, noBack }: ChatShellProps) {
+  const nav = useNavigate();
+  const logId = logKey ?? `log:${bot}`;
   const [turns, setTurns] = useState<ChatTurn[] | null>(null);
   const [text, setText] = useState('');
   const [busy, setBusy] = useState(false);
   const [mood, setMood] = useState<Expr>(persona?.expr ?? 'default');
-  const [typingIndex, setTypingIndex] = useState<number | null>(null); // 글자 단위로 보여 주는 중인 말풍선
+  const [typingIndex, setTypingIndex] = useState<number | null>(null);
   const [atBottom, setAtBottom] = useState(true);
   const mode = useAppStore((s) => s.mode);
   const note = useAppStore((s) => s.note);
   const online = useOnline();
-  const listRef = useRef<HTMLDivElement>(null);
   const endRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
-  const restoredCount = useRef(0); // 복원된 말풍선만 순서대로 등장시키고, 새 말풍선은 바로 보여 줍니다
+  const restoredCount = useRef(0);
 
-  // 대화 로그 복원. 비어 있으면 고정 첫 말풍선만 넣습니다.
   useEffect(() => {
     let alive = true;
     db.chatLogs.get(logId).then((log) => {
@@ -143,7 +146,6 @@ export function ChatShell({ bot, intro, systemHint, quickReplies, onEvent, maxTu
     e.preventDefault();
     void send(text);
   };
-  // 한글 조합 중 Enter 가 미완성 글자를 보내지 않게 막습니다.
   const onKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter' && e.nativeEvent.isComposing) e.preventDefault();
   };
@@ -162,13 +164,13 @@ export function ChatShell({ bot, intro, systemHint, quickReplies, onEvent, maxTu
 
   return (
     <div className="relative flex h-full min-h-0 flex-col bg-canvas">
-      <ChatHeader expr={headerExpr} name={persona?.name} back={back} online={online} />
+      <ChatHeader expr={headerExpr} name={persona?.name ?? title} back={back} online={online} noBack={noBack} />
       {progress !== undefined && (
-        <div className="h-1 bg-lavender">
-          <div className="h-1 bg-primary transition-all duration-slow ease-app" style={{ width: `${Math.round(Math.min(1, Math.max(0, progress)) * 100)}%` }} />
+        <div className="mx-4 h-1.5 overflow-hidden rounded-full bg-lavender">
+          <div className="h-full rounded-full bg-primary transition-all duration-slow ease-app" style={{ width: `${Math.round(Math.min(1, Math.max(0, progress)) * 100)}%` }} />
         </div>
       )}
-      <div ref={listRef} onScroll={onScroll} className="flex-1 space-y-1 overflow-y-auto px-4 py-3">
+      <div onScroll={onScroll} className="flex-1 space-y-1 overflow-y-auto px-4 py-3">
         {turns === null && (
           <>
             <div className="flex items-start gap-2">
@@ -217,7 +219,16 @@ export function ChatShell({ bot, intro, systemHint, quickReplies, onEvent, maxTu
             </div>
           </div>
         )}
-        {!busy && !typing && turns && chips.length > 0 && (
+        {!busy && !typing && turns && userCount === 0 && quickActions && quickActions.length > 0 && (
+          <div className="mt-3 flex flex-col gap-2 pl-11">
+            {quickActions.map((a, i) => (
+              <button key={a.label} type="button" onClick={() => nav(a.to, { viewTransition: true })} className="chip pop press w-fit max-w-full text-left" style={{ animationDelay: `${i * 70}ms` }}>
+                {a.label}
+              </button>
+            ))}
+          </div>
+        )}
+        {!busy && !typing && turns && chips.length > 0 && (userCount > 0 || !quickActions) && (
           <div className="mt-3 flex flex-wrap gap-2 pl-11">
             {chips.map((chip, i) => (
               <button key={chip} type="button" onClick={() => void send(chip)} className="chip pop press text-left" style={{ animationDelay: `${i * 70}ms` }}>

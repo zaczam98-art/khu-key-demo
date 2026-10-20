@@ -2,6 +2,7 @@ import Dexie, { type Table } from 'dexie';
 
 // CLAUDE.md 5절의 데이터 모델. 실명·학번·전화·이메일 필드는 두지 않습니다.
 export type TargetJob = { name: string; source: 'explore' | 'manual'; confidence: '상' | '중' | '하'; reason: string };
+export type Strength = { title: string; desc: string };
 export interface Profile {
   id: 'me';
   nickname?: string;
@@ -9,6 +10,7 @@ export interface Profile {
   major?: string;
   targetJobs: TargetJob[];
   strengths: string[];
+  strengthDetails?: Strength[]; // 경험 종합 분석 결과 (제목 + 근거)
   exploreKeywords: string[];
   createdAt: string;
   updatedAt: string;
@@ -46,6 +48,8 @@ export interface EssayQuestion {
   status: QuestionStatus;
   versions: EssayVersion[];
   feedback?: string;
+  points?: string[];
+  examples?: { before: string; after: string }[];
 }
 export interface Application {
   id: string;
@@ -53,12 +57,16 @@ export interface Application {
   job: string;
   postUrl?: string;
   postText?: string;
+  postSummary?: string;
   keywords: string[];
   values?: string;
   deadline?: string;
   stage: Stage;
   questions: EssayQuestion[];
   checklist: { item: string; done: boolean }[];
+  createdAt?: string;
+  completedAt?: string;
+  submittedAt?: string;
 }
 export type TaskType = '자소서' | '서류제출' | '인적성' | '면접' | '기타';
 export const TASK_TYPES: TaskType[] = ['자소서', '서류제출', '인적성', '면접', '기타'];
@@ -77,12 +85,16 @@ export type InterviewType = '실무' | '임원' | 'PT' | 'AI화상';
 export interface MockSession {
   id: string;
   appId?: string;
+  company?: string;
+  job?: string;
   mode: 'text' | 'voice';
   type: InterviewType;
+  focus?: string[];
   turns: { n: number; kind: '기본' | '꼬리'; q: string; basis: string; a: string; audioSec?: number }[];
   scores: { logic: number; jobFit: number; concreteness: number; delivery: number };
   evidence: { item: string; quote: string; comment: string }[];
   summary?: string;
+  details?: { n: number; title: string; score: number; good: string[]; improve: string[]; suggest: string[]; model: string }[];
   createdAt: string;
 }
 export type ChatTurn = { role: 'user' | 'assistant'; content: string; at: string };

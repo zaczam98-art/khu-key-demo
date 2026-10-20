@@ -5,6 +5,7 @@ import essayDemo from '../demo/essay.json';
 import exploreDemo from '../demo/explore.json';
 import interviewDemo from '../demo/interview.json';
 import mockDemo from '../demo/mock.json';
+import { COOKIE_ESSAY_SYSTEM } from '../prompts/essay-chat';
 import { COOKIE_EXPLORE_SYSTEM } from '../prompts/explore-chat';
 import { COOKIE_INTERVIEW_SYSTEM } from '../prompts/interview-chat';
 import { COOKIE_MOCK_SYSTEM } from '../prompts/mock-chat';
@@ -15,7 +16,8 @@ export type JsonResult<T> = { data: T; credits?: number; demo: boolean; reason?:
 export type Bot = 'explore' | 'interview' | 'essay' | 'mock';
 
 const BASE = () => (process.env.CHATKHU_BASE || 'https://factchat-cloud.mindlogic.ai/v1/gateway').replace(/\/$/, '');
-const KEY = () => process.env.CHATKHU_API_KEY || process.env.CHATKHU_API_KEY_A || '';
+export const apiKey = (): string => process.env.CHATKHU_API_KEY || process.env.CHATKHU_API_KEY_A || '';
+export const gatewayBase = BASE;
 const MODEL = () => process.env.CHATKHU_MODEL || 'claude-sonnet-5-5';
 const CAP = () => Number(process.env.DAILY_CREDIT_CAP || 550);
 export const botId = (bot: string): string => process.env[`CHATKHU_BOT_${bot.toUpperCase()}`] || '';
@@ -24,17 +26,27 @@ export const botId = (bot: string): string => process.env[`CHATKHU_BOT_${bot.toU
 const FALLBACK_SYSTEM: Record<Bot, string> = {
   explore: COOKIE_EXPLORE_SYSTEM,
   interview: COOKIE_INTERVIEW_SYSTEM,
-  essay: COOKIE_INTERVIEW_SYSTEM,
+  essay: COOKIE_ESSAY_SYSTEM,
   mock: COOKIE_MOCK_SYSTEM,
 };
 // 체험 모드 대본
 const DEMO_REPLIES: Record<Bot, string[][]> = {
   explore: exploreDemo.replies,
   interview: interviewDemo.replies,
-  essay: interviewDemo.replies,
+  essay: essayDemo.replies,
   mock: mockDemo.replies,
 };
-export const demoData = { explore: exploreDemo.result, experience: interviewDemo.result, post: essayDemo.post, draft: essayDemo.draft, feedback: essayDemo.feedback, score: mockDemo.result };
+export const demoData = {
+  explore: exploreDemo.result,
+  experience: interviewDemo.result,
+  analysis: interviewDemo.analysis,
+  post: essayDemo.post,
+  draft: essayDemo.draft,
+  feedback: essayDemo.feedback,
+  revise: essayDemo.revise,
+  score: mockDemo.result,
+  answers: mockDemo.userScript,
+};
 
 // 1K 토큰당 (입력, 출력) 크레딧 추정 단가. 문서에 공식 단가가 없어 CLAUDE.md 값을 쓰고, usage 가 없으면 글자 수÷2 로 근사합니다.
 const PRICE: Record<string, [number, number]> = {
@@ -65,11 +77,15 @@ export async function usedToday(): Promise<number> {
   return (await kv(['GET', key])) ?? mem.get(key) ?? 0;
 }
 
-async function record(credits: number, anon: string): Promise<void> {
+export async function record(credits: number, anon: string): Promise<void> {
   const total = `usage:${today()}`;
   const perUser = `usage:${today()}:anon:${anon}`;
   if ((await kv(['INCRBYFLOAT', total, credits])) === null) mem.set(total, (mem.get(total) ?? 0) + credits);
   if ((await kv(['INCR', perUser])) === null) mem.set(perUser, (mem.get(perUser) ?? 0) + 1);
+}
+
+export async function overCap(): Promise<boolean> {
+  return (await usedToday()) >= CAP();
 }
 
 type Usage = { prompt_tokens?: number; completion_tokens?: number } | null | undefined;
@@ -84,7 +100,7 @@ type Completion = { choices?: { message?: { content?: string } }[]; usage?: Usag
 async function call(path: string, body: unknown): Promise<Completion> {
   const r = await fetch(`${BASE()}${path}`, {
     method: 'POST',
-    headers: { authorization: `Bearer ${KEY()}`, 'content-type': 'application/json' },
+    headers: { authorization: `Bearer ${apiKey()}`, 'content-type': 'application/json' },
     body: JSON.stringify(body),
   });
   if (!r.ok) throw new Error(`ChatKHU ${r.status}: ${(await r.text()).slice(0, 300)}`);
@@ -102,8 +118,8 @@ export const isBot = (value: string): value is Bot => value === 'explore' || val
 // 대화형. 챗봇 id가 있으면 스튜디오 챗봇, 키만 있으면 일반 모델 + 쿠키 지시문, 둘 다 없거나 상한·오류면 데모.
 export async function chat(bot: Bot, messages: Msg[], anon: string, systemHint?: string): Promise<ChatResult> {
   const history = messages.filter((m) => m.role !== 'system');
-  if (!KEY()) return { bubbles: demoBubbles(bot, history), demo: true, reason: 'no-key' };
-  if ((await usedToday()) >= CAP()) return { bubbles: demoBubbles(bot, history), demo: true, reason: 'cap' };
+  if (!apiKey()) return { bubbles: demoBubbles(bot, history), demo: true, reason: 'no-key' };
+  if (await overCap()) return { bubbles: demoBubbles(bot, history), demo: true, reason: 'cap' };
   const chars = history.reduce((n, m) => n + m.content.length, 0);
   const model = MODEL();
   try {
@@ -136,8 +152,8 @@ export async function completeJson<T>(
   validate: (data: unknown) => T,
   demoValue: T,
 ): Promise<JsonResult<T>> {
-  if (!KEY()) return { data: demoValue, demo: true, reason: 'no-key' };
-  if ((await usedToday()) >= CAP()) return { data: demoValue, demo: true, reason: 'cap' };
+  if (!apiKey()) return { data: demoValue, demo: true, reason: 'no-key' };
+  if (await overCap()) return { data: demoValue, demo: true, reason: 'cap' };
   const model = MODEL();
   const chars = system.length + messages.reduce((n, m) => n + m.content.length, 0);
   let lastError = '';
@@ -147,7 +163,7 @@ export async function completeJson<T>(
         model,
         messages: [{ role: 'system', content: system }, ...messages],
         temperature: 0.3,
-        max_tokens: 2048,
+        max_tokens: 3000,
         response_format: { type: 'json_schema', json_schema: { name, strict: true, schema } },
       });
       const raw = res.choices?.[0]?.message?.content ?? '';
