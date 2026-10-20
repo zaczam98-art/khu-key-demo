@@ -1,0 +1,5 @@
+blank_issues_enabled: true
+contact_links:
+  - name: 작업 규칙
+    url: https://github.com/zaczam98-art/khu-key-demo/blob/main/AGENTS.md
+    about: 이슈 1개 = 브랜치 1개 = PR 1개. 먼저 CLAUDE.md 와 AGENTS.md 를 읽습니다.

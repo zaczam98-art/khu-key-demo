@@ -1,5 +1,6 @@
 import { BrowserRouter, Route, Routes, useLocation } from 'react-router-dom';
 import { TabBar } from './components/TabBar';
+import { Toast } from './components/Toast';
 import { EssayScreen } from './screens/essay/EssayScreen';
 import { ExploreAnalyzing } from './screens/explore/ExploreAnalyzing';
 import { ExploreChat } from './screens/explore/ExploreChat';
@@ -20,7 +21,8 @@ function Frame() {
   const showTabs = TAB_ROUTES.has(pathname.replace(/\/$/, '') || '/');
   return (
     <div className="mx-auto flex min-h-dvh w-full max-w-[420px] flex-col bg-canvas shadow-[0_0_40px_rgba(60,40,120,0.08)]">
-      <main className="flex flex-1 flex-col">
+      {/* 경로가 바뀔 때마다 key 가 바뀌어 화면 전환 애니메이션이 다시 재생됩니다. */}
+      <main key={pathname} className="page flex flex-1 flex-col">
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/explore" element={<ExploreStart />} />
@@ -29,6 +31,7 @@ function Frame() {
           <Route path="/explore/summary" element={<ExploreSummary />} />
           <Route path="/explore/jobs" element={<ExploreJobs />} />
           <Route path="/explore/jobs/:index" element={<ExploreJobDetail />} />
+          <Route path="/explore/dictionary/:name" element={<ExploreJobDetail />} />
           <Route path="/explore/saved" element={<ExploreSaved />} />
           <Route path="/profile" element={<ProfileScreen />} />
           <Route path="/essay" element={<EssayScreen />} />
@@ -37,6 +40,7 @@ function Frame() {
         </Routes>
       </main>
       {showTabs && <TabBar />}
+      <Toast />
     </div>
   );
 }

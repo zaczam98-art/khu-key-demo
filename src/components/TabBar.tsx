@@ -18,10 +18,19 @@ export function TabBar() {
           key={tab.to}
           to={tab.to}
           end={tab.to === '/'}
-          className={({ isActive }) => `flex flex-1 flex-col items-center gap-0.5 py-2 text-[11px] ${isActive ? 'text-primary' : 'text-muted'}`}
+          className={({ isActive }) =>
+            `press relative flex flex-1 flex-col items-center gap-0.5 py-2 text-[11px] transition-colors ${isActive ? 'text-primary' : 'text-muted'}`
+          }
         >
-          <Icon name={tab.icon} size={22} />
-          {tab.label}
+          {({ isActive }) => (
+            <>
+              <span className={`transition-transform duration-200 ${isActive ? '-translate-y-0.5 scale-110' : ''}`}>
+                <Icon name={tab.icon} size={22} />
+              </span>
+              {tab.label}
+              <span className={`absolute bottom-0.5 h-1 w-1 rounded-full bg-primary transition-opacity ${isActive ? 'opacity-100' : 'opacity-0'}`} />
+            </>
+          )}
         </NavLink>
       ))}
     </nav>

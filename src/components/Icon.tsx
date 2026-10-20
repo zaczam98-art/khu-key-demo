@@ -1,6 +1,10 @@
+import type { CSSProperties } from 'react';
 import type { JobIcon } from '../data/jobs';
 
-export type IconName = JobIcon | 'home' | 'compass' | 'user' | 'doc' | 'mic' | 'check' | 'download' | 'heart' | 'bulb';
+export type IconName =
+  | JobIcon
+  | 'home' | 'compass' | 'user' | 'doc' | 'mic'
+  | 'check' | 'download' | 'heart' | 'bulb' | 'sparkle' | 'copy' | 'install' | 'arrow' | 'refresh';
 
 const PATHS: Record<IconName, string> = {
   chart: 'M4 20V10h3v10H4zm6.5 0V4h3v16h-3zM17 20v-7h3v7h-3z',
@@ -13,6 +17,22 @@ const PATHS: Record<IconName, string> = {
   code: 'M9.4 16.6L4.8 12l4.6-4.6L8 6l-6 6 6 6 1.4-1.4zm5.2 0l4.6-4.6-4.6-4.6L16 6l6 6-6 6-1.4-1.4z',
   server: 'M4 4h16a1 1 0 0 1 1 1v4a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1zm0 10h16a1 1 0 0 1 1 1v4a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1v-4a1 1 0 0 1 1-1zm2-7a1 1 0 1 0 0 2 1 1 0 0 0 0-2zm0 10a1 1 0 1 0 0 2 1 1 0 0 0 0-2z',
   handshake: 'M11 6l-4.5 4.5a1.5 1.5 0 0 0 2.1 2.1L11 10.2l1 1-2.5 2.5a1.5 1.5 0 0 0 2.1 2.1l3.9-3.9 2 2a1.4 1.4 0 0 0 2-2L15 7.4A3 3 0 0 0 12.9 6.5L11 6zM2 8l5-2 1 1-4 4-2-3zm20 0l-5-2-1 1 4 4 2-3z',
+  megaphone: 'M4 9h3l6-4v14l-6-4H4V9zm11 0a3 3 0 0 1 0 6v-2a1 1 0 0 0 0-2V9zm0-4a7 7 0 0 1 0 14v-2a5 5 0 0 0 0-10V5z',
+  bag: 'M7 8V6a5 5 0 0 1 10 0v2h3l-1 13H5L4 8h3zm2 0h6V6a3 3 0 0 0-6 0v2z',
+  brain: 'M9 3a3 3 0 0 0-3 3v1a3 3 0 0 0-2 5 3 3 0 0 0 2 5v1a3 3 0 0 0 5 2V3H9zm6 0h-2v17a3 3 0 0 0 5-2v-1a3 3 0 0 0 2-5 3 3 0 0 0-2-5V6a3 3 0 0 0-3-3z',
+  bug: 'M12 4a4 4 0 0 1 4 4v1h2l2-2 1.4 1.4L19 11v2h3v2h-3v1a7 7 0 0 1-.3 2l2.7 2.7-1.4 1.4-2.3-2.3A7 7 0 0 1 12 22a7 7 0 0 1-5.7-2.2L4 22.1 2.6 20.7 5.3 18A7 7 0 0 1 5 16v-1H2v-2h3v-2L2.6 8.4 4 7l2 2h2V8a4 4 0 0 1 4-4zm-2 5h4V8a2 2 0 0 0-4 0v1z',
+  cloud: 'M7 18a5 5 0 0 1-.8-9.9A6 6 0 0 1 17.7 9 4.5 4.5 0 0 1 17 18H7z',
+  shield: 'M12 2l8 3v6c0 5-3.4 9.4-8 11-4.6-1.6-8-6-8-11V5l8-3zm-1 13l6-6-1.4-1.4L11 12.2 8.4 9.6 7 11l4 4z',
+  palette: 'M12 3a9 9 0 0 0 0 18c1 0 1.5-.6 1.5-1.3 0-.4-.2-.7-.4-1-.3-.3-.4-.6-.4-1 0-.8.6-1.4 1.4-1.4H16a5 5 0 0 0 5-5c0-4.5-4-8.3-9-8.3zM7.5 12a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3zm3-4a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3zm4 0a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3zm3 4a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3z',
+  video: 'M3 6h13a1 1 0 0 1 1 1v3l4-2.5v9L17 14v3a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1z',
+  coin: 'M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm1 15h-2v-1.1c-1.6-.3-2.6-1.3-2.7-2.6h1.9c.1.6.6 1 1.6 1 .9 0 1.4-.4 1.4-1 0-.5-.3-.8-1.5-1.1-1.9-.5-3.1-1.1-3.1-2.7 0-1.3 1-2.2 2.4-2.5V6h2v1.1c1.4.3 2.3 1.2 2.4 2.5h-1.9c-.1-.6-.5-1-1.4-1-.8 0-1.3.4-1.3.9 0 .5.4.8 1.6 1.1 2 .5 3 1.2 3 2.7 0 1.4-1 2.3-2.4 2.6V17z',
+  target: 'M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm0 4a6 6 0 1 1 0 12 6 6 0 0 1 0-12zm0 4a2 2 0 1 0 0 4 2 2 0 0 0 0-4z',
+  headset: 'M12 3a8 8 0 0 0-8 8v6a3 3 0 0 0 3 3h2v-7H6v-2a6 6 0 0 1 12 0v2h-3v7h2a3 3 0 0 0 3-3v-6a8 8 0 0 0-8-8z',
+  book: 'M5 3h12a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2zm1 2v12h11V5H6zm2 2h7v2H8V7zm0 4h7v2H8v-2z',
+  flask: 'M9 3h6v2h-1v5l5 8.5A2 2 0 0 1 17.3 21H6.7A2 2 0 0 1 5 18.5L10 10V5H9V3zm3 9.5L9.5 17h5L12 12.5z',
+  factory: 'M3 21V9l5 3V9l5 3V9l5 3V5h3v16H3zm3-2h2v-3H6v3zm5 0h2v-3h-2v3zm5 0h2v-3h-2v3z',
+  truck: 'M2 6h12v9H2V6zm13 3h4l3 3v3h-7V9zM6 19a2 2 0 1 1 0-4 2 2 0 0 1 0 4zm12 0a2 2 0 1 1 0-4 2 2 0 0 1 0 4z',
+  flag: 'M5 3h2v18H5V3zm3 1h11l-2.5 4L19 12H8V4z',
   home: 'M12 3l9 8h-3v9h-5v-6h-2v6H6v-9H3l9-8z',
   compass: 'M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm4 6l-2.5 6L8 16.5 10.5 10 16 8z',
   user: 'M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8zm0 2c-3.3 0-8 1.7-8 4v2h16v-2c0-2.3-4.7-4-8-4z',
@@ -22,11 +42,16 @@ const PATHS: Record<IconName, string> = {
   download: 'M12 3v10.2l3.6-3.6L17 11l-5 5-5-5 1.4-1.4L11 13.2V3h1zM4 19h16v2H4v-2z',
   heart: 'M12 21s-7.5-4.6-9.5-9A5.5 5.5 0 0 1 12 6.1 5.5 5.5 0 0 1 21.5 12c-2 4.4-9.5 9-9.5 9z',
   bulb: 'M9 21h6v-1H9v1zm3-19a7 7 0 0 0-4 12.7V17h8v-2.3A7 7 0 0 0 12 2z',
+  sparkle: 'M12 2l1.8 5.2L19 9l-5.2 1.8L12 16l-1.8-5.2L5 9l5.2-1.8L12 2zm7 11l.9 2.6 2.6.9-2.6.9L19 20l-.9-2.6-2.6-.9 2.6-.9L19 13zM5 14l.7 2 2 .7-2 .7L5 19.5l-.7-2-2-.7 2-.7.7-2.1z',
+  copy: 'M8 2h10a2 2 0 0 1 2 2v12h-2V4H8V2zM4 6h10a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2zm0 2v12h10V8H4z',
+  install: 'M5 20h14v2H5v-2zm7-2l-6-6h4V4h4v8h4l-6 6z',
+  arrow: 'M4 11h12.2l-4.6-4.6L13 5l7 7-7 7-1.4-1.4 4.6-4.6H4v-2z',
+  refresh: 'M12 5V2L8 6l4 4V7a5 5 0 1 1-4.9 6H5.1A7 7 0 1 0 12 5z',
 };
 
-export function Icon({ name, size = 20, className = '' }: { name: IconName; size?: number; className?: string }) {
+export function Icon({ name, size = 20, className = '', style }: { name: IconName; size?: number; className?: string; style?: CSSProperties }) {
   return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" className={className}>
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" className={className} style={style}>
       <path d={PATHS[name]} />
     </svg>
   );
