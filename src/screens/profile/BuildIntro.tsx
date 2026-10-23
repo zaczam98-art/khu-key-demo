@@ -10,8 +10,7 @@ export function BuildHeader({ step, back }: { step: number; back?: string }) {
     <header className="sticky top-0 z-10 flex h-14 items-center gap-2 bg-canvas/95 px-4 backdrop-blur">
       <BackButton to={back} />
       <div className="flex flex-1 items-center justify-end gap-2">
-        <Badge tone="soft">프로필 구축</Badge>
-        <span className="text-caption text-muted">프로필 구축 {step}/5</span>
+        <Badge tone="soft">프로필 구축 {step}/5</Badge>
       </div>
     </header>
   );

@@ -135,7 +135,7 @@ export function ProfileScreen() {
             right={
               <Link to="/explore" viewTransition className="btn-ghost -mr-3 text-primary">
                 <Icon name="refresh" size={14} />
-                다시 탐색
+                {profile?.targetJobs.length ? '다시 탐색' : '탐색하기'}
               </Link>
             }
           >

@@ -1,41 +1,66 @@
+import { lazy, Suspense, useEffect, type ComponentType } from 'react';
 import { BrowserRouter, Navigate, Route, Routes, useLocation } from 'react-router-dom';
 import { Icon } from './components/Icon';
 import { Splash } from './components/Splash';
 import { TabBar } from './components/TabBar';
 import { Toast } from './components/Toast';
+import { Spinner } from './components/ui';
 import { useClock } from './lib/hooks';
-import { EssayDetail } from './screens/essay/EssayDetail';
-import { EssayDone } from './screens/essay/EssayDone';
-import { EssayHub } from './screens/essay/EssayHub';
-import { EssayNew } from './screens/essay/EssayNew';
-import { EssayQuestionScreen } from './screens/essay/EssayQuestion';
-import { EssayStart } from './screens/essay/EssayStart';
-import { ExploreAnalyzing } from './screens/explore/ExploreAnalyzing';
-import { ExploreChat } from './screens/explore/ExploreChat';
-import { ExploreJobDetail } from './screens/explore/ExploreJobDetail';
-import { ExploreJobs } from './screens/explore/ExploreJobs';
-import { ExploreSaved } from './screens/explore/ExploreSaved';
-import { ExploreStart } from './screens/explore/ExploreStart';
-import { ExploreSummary } from './screens/explore/ExploreSummary';
 import { Home } from './screens/home/Home';
 import { Schedule } from './screens/home/Schedule';
 import { isOnboarded, Welcome } from './screens/home/Welcome';
-import { Celebrate } from './screens/mock/Celebrate';
-import { MockDetail } from './screens/mock/MockDetail';
-import { MockHistory } from './screens/mock/MockHistory';
-import { MockResult } from './screens/mock/MockResult';
-import { MockSession } from './screens/mock/MockSession';
-import { MockSetupScreen } from './screens/mock/MockSetup';
-import { MockStart } from './screens/mock/MockStart';
-import { BuildAnalysis } from './screens/profile/BuildAnalysis';
-import { BuildCategories } from './screens/profile/BuildCategories';
-import { BuildChat } from './screens/profile/BuildChat';
-import { BuildIntro } from './screens/profile/BuildIntro';
-import { BuildMore } from './screens/profile/BuildMore';
-import { BuildDone, BuildPreview, BuildUsage } from './screens/profile/BuildPreview';
-import { BuildReview } from './screens/profile/BuildReview';
-import { ExperienceDetail } from './screens/profile/ExperienceDetail';
-import { ProfileScreen } from './screens/profile/ProfileScreen';
+
+// 홈·일정·닉네임만 처음에 받고, 모듈 4개는 각 묶음(screens/*/index.ts)을 그 탭으로 갈 때 받습니다.
+// 첫 화면이 뜬 뒤 한가할 때 네 묶음을 미리 받아 두므로 탭 전환은 끊기지 않습니다.
+const loadExplore = () => import('./screens/explore');
+const loadProfile = () => import('./screens/profile');
+const loadEssay = () => import('./screens/essay');
+const loadMock = () => import('./screens/mock');
+const lz = <M,>(load: () => Promise<M>, pick: (m: M) => ComponentType) => lazy(() => load().then((m) => ({ default: pick(m) })));
+
+const ExploreStart = lz(loadExplore, (m) => m.ExploreStart);
+const ExploreChat = lz(loadExplore, (m) => m.ExploreChat);
+const ExploreAnalyzing = lz(loadExplore, (m) => m.ExploreAnalyzing);
+const ExploreSummary = lz(loadExplore, (m) => m.ExploreSummary);
+const ExploreJobs = lz(loadExplore, (m) => m.ExploreJobs);
+const ExploreJobDetail = lz(loadExplore, (m) => m.ExploreJobDetail);
+const ExploreSaved = lz(loadExplore, (m) => m.ExploreSaved);
+
+const ProfileScreen = lz(loadProfile, (m) => m.ProfileScreen);
+const BuildIntro = lz(loadProfile, (m) => m.BuildIntro);
+const BuildCategories = lz(loadProfile, (m) => m.BuildCategories);
+const BuildChat = lz(loadProfile, (m) => m.BuildChat);
+const BuildReview = lz(loadProfile, (m) => m.BuildReview);
+const BuildMore = lz(loadProfile, (m) => m.BuildMore);
+const BuildAnalysis = lz(loadProfile, (m) => m.BuildAnalysis);
+const BuildPreview = lz(loadProfile, (m) => m.BuildPreview);
+const BuildUsage = lz(loadProfile, (m) => m.BuildUsage);
+const BuildDone = lz(loadProfile, (m) => m.BuildDone);
+const ExperienceDetail = lz(loadProfile, (m) => m.ExperienceDetail);
+
+const EssayStart = lz(loadEssay, (m) => m.EssayStart);
+const EssayHub = lz(loadEssay, (m) => m.EssayHub);
+const EssayNew = lz(loadEssay, (m) => m.EssayNew);
+const EssayDetail = lz(loadEssay, (m) => m.EssayDetail);
+const EssayDone = lz(loadEssay, (m) => m.EssayDone);
+const EssayQuestionScreen = lz(loadEssay, (m) => m.EssayQuestionScreen);
+
+const MockStart = lz(loadMock, (m) => m.MockStart);
+const MockSetupScreen = lz(loadMock, (m) => m.MockSetupScreen);
+const MockSession = lz(loadMock, (m) => m.MockSession);
+const MockHistory = lz(loadMock, (m) => m.MockHistory);
+const MockResult = lz(loadMock, (m) => m.MockResult);
+const MockDetail = lz(loadMock, (m) => m.MockDetail);
+const Celebrate = lz(loadMock, (m) => m.Celebrate);
+
+function usePreloadModules() {
+  useEffect(() => {
+    const run = () => void Promise.allSettled([loadExplore(), loadProfile(), loadEssay(), loadMock()]);
+    const w = window as Window & { requestIdleCallback?: (cb: () => void, opts?: { timeout: number }) => number };
+    if (w.requestIdleCallback) w.requestIdleCallback(run, { timeout: 4000 });
+    else window.setTimeout(run, 1500);
+  }, []);
+}
 
 // 하단 탭은 모듈 첫 화면에서만 보입니다. 대화·결과 화면에는 탭이 없습니다.
 const TAB_ROUTES = new Set(['/', '/explore', '/profile', '/essay', '/mock']);
@@ -65,6 +90,7 @@ function Frame() {
   const { pathname } = useLocation();
   const showTabs = TAB_ROUTES.has(pathname.replace(/\/$/, '') || '/');
   const needsWelcome = !isOnboarded() && pathname !== '/welcome';
+  usePreloadModules();
   return (
     <div className="flex min-h-dvh items-center justify-center md:py-6">
       <div className="relative flex h-dvh w-full max-w-[420px] flex-col overflow-hidden bg-canvas md:h-[min(844px,calc(100dvh-48px))] md:rounded-[40px] md:border-[10px] md:border-[#1b1830] md:shadow-pop">
@@ -73,6 +99,13 @@ function Frame() {
           {needsWelcome ? (
             <Navigate to="/welcome" replace />
           ) : (
+            <Suspense
+              fallback={
+                <div className="flex flex-1 items-center justify-center">
+                  <Spinner />
+                </div>
+              }
+            >
             <Routes>
               <Route path="/welcome" element={<Welcome />} />
               <Route path="/" element={<Home />} />
@@ -127,6 +160,7 @@ function Frame() {
                 }
               />
             </Routes>
+            </Suspense>
           )}
         </main>
         {showTabs && <TabBar />}

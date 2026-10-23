@@ -10,8 +10,16 @@ export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, fileURLToPath(new URL('.', import.meta.url)), '');
   for (const [k, v] of Object.entries(env)) if (process.env[k] === undefined) process.env[k] = v;
   const base = process.env.VITE_BASE || '/';
+  // index.html 의 공유용 메타 태그(og:url, og:image)가 쓰는 절대 주소. 다른 곳에 올리면 VITE_SITE_URL 로 바꿉니다.
+  if (!process.env.VITE_SITE_URL) process.env.VITE_SITE_URL = 'https://zaczam98-art.github.io/khu-key-demo/';
   return {
     base,
+    build: {
+      rollupOptions: {
+        // node_modules 는 vendor 한 덩어리로 두어 배포마다 바뀌지 않게 하고, 모듈 4개는 App.tsx 의 늦은 불러오기로 나뉩니다.
+        output: { manualChunks: (id) => (id.includes('node_modules') ? 'vendor' : undefined) },
+      },
+    },
     plugins: [
       react(),
       devApi(),
@@ -26,6 +34,7 @@ export default defineConfig(({ mode }) => {
           name: '쿠키 | KHU:KEY 커리어 메이트',
           short_name: '쿠키',
           description: '먼저 질문하는 AI 커리어 메이트, 쿠키',
+          lang: 'ko',
           theme_color: '#7B6CF6',
           background_color: '#F7F6FB',
           display: 'standalone',

@@ -79,7 +79,7 @@ export function ChatShell({ bot, intro, systemHint, quickReplies, quickActions, 
   const note = useAppStore((s) => s.note);
   const online = useOnline();
   const endRef = useRef<HTMLDivElement>(null);
-  const inputRef = useRef<HTMLInputElement>(null);
+  const inputRef = useRef<HTMLTextAreaElement>(null);
   const restoredCount = useRef(0);
 
   useEffect(() => {
@@ -116,6 +116,7 @@ export function ChatShell({ bot, intro, systemHint, quickReplies, quickActions, 
     if (!content || busy || !turns) return;
     const withUser = [...turns, { role: 'user' as const, content, at: new Date().toISOString() }];
     setText('');
+    if (inputRef.current) inputRef.current.style.height = '';
     setAtBottom(true);
     await persist(withUser);
     setBusy(true);
@@ -146,8 +147,17 @@ export function ChatShell({ bot, intro, systemHint, quickReplies, quickActions, 
     e.preventDefault();
     void send(text);
   };
-  const onKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter' && e.nativeEvent.isComposing) e.preventDefault();
+  // Enter 는 보내기, Shift+Enter 는 줄바꿈. 한글 조합 중 Enter 는 조합만 끝내고 보내지 않습니다.
+  const onKeyDown = (e: KeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.key !== 'Enter' || e.shiftKey) return;
+    e.preventDefault();
+    if (e.nativeEvent.isComposing) return;
+    void send(text);
+  };
+  // 입력한 줄 수만큼 늘어나고 6줄 정도에서 멈춥니다.
+  const grow = (el: HTMLTextAreaElement) => {
+    el.style.height = '';
+    el.style.height = `${Math.min(el.scrollHeight, 132)}px`;
   };
 
   const list = turns ?? [];
@@ -155,7 +165,7 @@ export function ChatShell({ bot, intro, systemHint, quickReplies, quickActions, 
   const last = list[list.length - 1];
   const lastBot = last?.role === 'assistant' ? last.content : undefined;
   const bullets = bulletLines(lastBot);
-  const suggestion = mode !== 'live' ? demoSuggestion(bot, toMsgs(list)) : undefined;
+  const suggestion = mode !== 'live' ? demoSuggestion(bot, toMsgs(list), systemHint) : undefined;
   const chips = quickReplies ?? (bullets.length ? bullets : suggestion ? [suggestion] : []);
   const typing = typingIndex !== null;
   const delayFor = (i: number) => (i < restoredCount.current ? `${Math.min(i, 8) * 60}ms` : '0ms');
@@ -261,20 +271,24 @@ export function ChatShell({ bot, intro, systemHint, quickReplies, quickActions, 
         </button>
       )}
       {!online && <p className="bg-warn/10 px-4 py-1.5 text-center text-caption text-warn">지금은 오프라인이야. 연결되면 다시 보내 줘.</p>}
-      <form onSubmit={submit} className="flex items-center gap-2 bg-canvas px-4 pb-[max(12px,env(safe-area-inset-bottom))] pt-2">
+      <form onSubmit={submit} className="flex items-end gap-2 bg-canvas px-4 pb-[max(12px,env(safe-area-inset-bottom))] pt-2">
         <button type="button" aria-label="추가" className="press flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-surface text-ink shadow-card">
           <Icon name="plus" size={20} />
         </button>
-        <input
+        <textarea
           ref={inputRef}
           value={text}
-          onChange={(e) => setText(e.target.value)}
+          rows={1}
+          onChange={(e) => {
+            setText(e.target.value);
+            grow(e.target);
+          }}
           onKeyDown={onKeyDown}
           placeholder={persona ? `${persona.name}에게 답하기...` : '쿠키에게 메시지 보내기...'}
           enterKeyHint="send"
           autoComplete="off"
           aria-label="메시지 입력"
-          className="h-11 min-w-0 flex-1 rounded-full bg-surface px-4 text-[0.875rem] text-ink shadow-card outline-none ring-primary/30 transition-shadow duration-fast placeholder:text-muted/70 focus:ring-2"
+          className="max-h-[132px] min-h-[44px] min-w-0 flex-1 resize-none rounded-[22px] bg-surface px-4 py-[11px] text-[0.875rem] leading-[22px] text-ink shadow-card outline-none ring-primary/30 transition-shadow duration-fast placeholder:text-muted/70 focus:ring-2"
         />
         <button
           type="submit"

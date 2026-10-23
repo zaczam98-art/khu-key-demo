@@ -112,8 +112,8 @@ export function MockSetupScreen() {
             <span className={`absolute top-0.5 h-6 w-6 rounded-full bg-white shadow transition-transform duration-base ease-app ${useEssay ? 'translate-x-5' : 'translate-x-0.5'}`} />
           </span>
         </button>
-        <p className="mt-3 flex items-center gap-1 text-caption text-muted">
-          <Icon name="mic" size={12} />
+        <p className="mt-3 flex items-start gap-1.5 text-caption text-muted">
+          <Icon name="mic" size={12} className="mt-0.5 shrink-0" />
           질문은 소리로 읽어 주고, 답변은 녹음하거나 글로 할 수 있어요. 실제 받아쓰기는 ChatKHU 키를 넣으면 켜져요.
         </p>
       </div>

@@ -3,6 +3,7 @@ import exploreDemo from '../../server/demo/explore.json';
 import interviewDemo from '../../server/demo/interview.json';
 import mockDemo from '../../server/demo/mock.json';
 import type { ChatTurn, Experience } from './db';
+import { categoryFromHint, interviewScript } from './demoScript';
 import {
   EssayDraftSchema,
   ExperienceCardSchema,
@@ -76,12 +77,14 @@ const DEMO_REPLIES: Record<Bot, string[][]> = { explore: exploreDemo.replies, in
 const DEMO_SCRIPT: Record<Bot, string[]> = { explore: exploreDemo.userScript, interview: interviewDemo.userScript, essay: essayDemo.userScript, mock: mockDemo.userScript };
 const userCount = (messages: Msg[]) => messages.filter((m) => m.role === 'user').length;
 
-export function demoReply(bot: Bot, messages: Msg[]): string[] {
-  const replies = DEMO_REPLIES[bot];
+// 경험 인터뷰는 화면 문맥(systemHint)의 분류에 맞는 대본을 씁니다. 분류마다 다른 카드가 나오게 하기 위해서입니다.
+export function demoReply(bot: Bot, messages: Msg[], systemHint?: string): string[] {
+  const replies = bot === 'interview' ? interviewScript(categoryFromHint(systemHint)).replies : DEMO_REPLIES[bot];
   return replies[Math.min(Math.max(userCount(messages) - 1, 0), replies.length - 1)];
 }
-export function demoSuggestion(bot: Bot, messages: Msg[]): string | undefined {
-  return DEMO_SCRIPT[bot][userCount(messages)];
+export function demoSuggestion(bot: Bot, messages: Msg[], systemHint?: string): string | undefined {
+  const script = bot === 'interview' ? interviewScript(categoryFromHint(systemHint)).userScript : DEMO_SCRIPT[bot];
+  return script[userCount(messages)];
 }
 
 export async function chat(bot: Bot, messages: Msg[], systemHint?: string): Promise<ChatReply> {
@@ -89,7 +92,7 @@ export async function chat(bot: Bot, messages: Msg[], systemHint?: string): Prom
     return await post<ChatReply>(`/api/chat/${bot}`, { messages, systemHint });
   } catch {
     await wait(900);
-    return { bubbles: demoReply(bot, messages), demo: true };
+    return { bubbles: demoReply(bot, messages, systemHint), demo: true };
   }
 }
 
@@ -104,7 +107,7 @@ export const extractExperience = (messages: Msg[], category?: string) =>
     '/api/extract-experience',
     { messages, category },
     (d) => ExperienceCardSchema.parse(d),
-    () => ExperienceCardSchema.parse(interviewDemo.result),
+    () => ExperienceCardSchema.parse(interviewScript(category).result),
     1800,
     '카드 정리에 실패했어요. 다시 시도해 주세요.',
   );

@@ -9,6 +9,7 @@ import { COOKIE_ESSAY_SYSTEM } from '../prompts/essay-chat';
 import { COOKIE_EXPLORE_SYSTEM } from '../prompts/explore-chat';
 import { COOKIE_INTERVIEW_SYSTEM } from '../prompts/interview-chat';
 import { COOKIE_MOCK_SYSTEM } from '../prompts/mock-chat';
+import { categoryFromHint, interviewScript } from '../../src/lib/demoScript';
 
 export type Msg = { role: 'user' | 'assistant' | 'system'; content: string };
 export type ChatResult = { bubbles: string[]; credits?: number; demo: boolean; reason?: string };
@@ -108,8 +109,8 @@ async function call(path: string, body: unknown): Promise<Completion> {
 }
 
 const userCount = (messages: Msg[]) => messages.filter((m) => m.role === 'user').length;
-function demoBubbles(bot: Bot, messages: Msg[]): string[] {
-  const replies = DEMO_REPLIES[bot];
+function demoBubbles(bot: Bot, messages: Msg[], systemHint?: string): string[] {
+  const replies = bot === 'interview' ? interviewScript(categoryFromHint(systemHint)).replies : DEMO_REPLIES[bot];
   return replies[Math.min(Math.max(userCount(messages) - 1, 0), replies.length - 1)];
 }
 
@@ -118,8 +119,8 @@ export const isBot = (value: string): value is Bot => value === 'explore' || val
 // 대화형. 챗봇 id가 있으면 스튜디오 챗봇, 키만 있으면 일반 모델 + 쿠키 지시문, 둘 다 없거나 상한·오류면 데모.
 export async function chat(bot: Bot, messages: Msg[], anon: string, systemHint?: string): Promise<ChatResult> {
   const history = messages.filter((m) => m.role !== 'system');
-  if (!apiKey()) return { bubbles: demoBubbles(bot, history), demo: true, reason: 'no-key' };
-  if (await overCap()) return { bubbles: demoBubbles(bot, history), demo: true, reason: 'cap' };
+  if (!apiKey()) return { bubbles: demoBubbles(bot, history, systemHint), demo: true, reason: 'no-key' };
+  if (await overCap()) return { bubbles: demoBubbles(bot, history, systemHint), demo: true, reason: 'cap' };
   const chars = history.reduce((n, m) => n + m.content.length, 0);
   const model = MODEL();
   try {
@@ -138,7 +139,7 @@ export async function chat(bot: Bot, messages: Msg[], anon: string, systemHint?:
     await record(credits, anon);
     return { bubbles: [content], credits, demo: false };
   } catch (e) {
-    return { bubbles: demoBubbles(bot, history), demo: true, reason: (e as Error).message };
+    return { bubbles: demoBubbles(bot, history, systemHint), demo: true, reason: (e as Error).message };
   }
 }
 
