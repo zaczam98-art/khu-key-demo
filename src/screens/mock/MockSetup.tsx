@@ -114,7 +114,7 @@ export function MockSetupScreen() {
         </button>
         <p className="mt-3 flex items-start gap-1.5 text-caption text-muted">
           <Icon name="mic" size={12} className="mt-0.5 shrink-0" />
-          질문은 소리로 읽어 주고, 답변은 녹음하거나 글로 할 수 있어요. 실제 받아쓰기는 ChatKHU 키를 넣으면 켜져요.
+          질문은 소리로 읽어 주고, 답변은 녹음하거나 글로 할 수 있어요.
         </p>
       </div>
       <div className="sticky bottom-0 bg-canvas/95 px-4 pb-[max(16px,env(safe-area-inset-bottom))] pt-2 backdrop-blur">
