@@ -11,7 +11,6 @@ import { useAppStore } from '../../store';
 export function ExploreSummary() {
   const nav = useNavigate();
   const result = useAppStore((s) => s.result);
-  const mode = useAppStore((s) => s.mode);
   const showToast = useAppStore((s) => s.showToast);
   const [sharing, setSharing] = useState(false);
   if (!result) return <Navigate to="/explore" replace />;
@@ -71,11 +70,6 @@ export function ExploreSummary() {
             </li>
           ))}
         </ul>
-        {mode === 'demo' && (
-          <p className="rise mt-5 text-center text-caption text-muted" style={{ animationDelay: '800ms' }}>
-            체험 모드 결과예요. ChatKHU를 연결하면 실제 대화로 분석해요.
-          </p>
-        )}
         <button type="button" onClick={() => nav('/explore/jobs', { viewTransition: true })} className="btn-primary rise mt-6 w-full" style={{ animationDelay: '850ms' }}>
           추천 직무 보기
           <Icon name="arrow" size={18} />
