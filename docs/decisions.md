@@ -99,3 +99,4 @@
 - 고친 것: api·server 의 상대 import 40건에 `.js` 확장자를 붙였고(Vite 와 tsc 는 `.js` 를 `.ts` 로 찾습니다), 서버의 체험 JSON 은 `createRequire` 로 읽습니다(타입은 `typeof import()` 로 유지). 브라우저와 서버가 같이 쓰는 `src/lib/demoScript.ts` 는 JSON 을 import 하지 않고 인자로 받습니다. `vercel.json` 의 `includeFiles` 로 `server/demo/*.json` 을 함수에 같이 넣습니다.
 - 버린 안: `"type": "module"` 제거(설정 파일이 전부 ESM 이라 영향이 큼), 함수를 esbuild 로 미리 묶기(Vercel 이 `api/*.ts` 를 그대로 함수로 잡아 충돌).
 - 공유 메타 주소는 Vercel 빌드에서 `VERCEL_PROJECT_PRODUCTION_URL` 을 자동으로 씁니다.
+- 같은 날 음성 경로도 실측해 고쳤습니다. STT 모델을 `whisper-1`(가정)에서 `stt-async-v5`(실제)로, TTS 는 `voice: alloy`(400) 를 빼고 게이트웨이가 주는 raw PCM 에 24kHz WAV 헤더를 서버에서 붙입니다. 받아쓰기 크레딧은 응답의 `credits_charged` 를 씁니다. 함수 제한 시간을 60초로 올렸습니다(`vercel.json`). 면접 음성 모드가 실제로 돕니다.

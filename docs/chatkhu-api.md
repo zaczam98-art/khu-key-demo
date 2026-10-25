@@ -58,3 +58,10 @@
 - 같은 날 오후, 직무 탐색 챗봇(56334)과 앱 화면에서 6턴을 실제로 대화했습니다. 챗봇은 한 번에 질문 하나씩 되묻기는 하지만, 사용자 메시지 4개 뒤 "- " 선택지, 번호 질문 3개, `<<EVENT:{"type":"analyze"}>>` 태그가 모두 나오지 않았고 6턴째에 `**굵게**` 마크다운이 나왔습니다. 스튜디오 지시문에 이벤트 규약이 아직 반영되지 않은 상태입니다. 앱은 사용자 메시지 9개 뒤 마무리 칩으로 넘어가므로 동작은 하지만, 규약이 들어가야 시안 흐름대로 5~6번 화면으로 이어집니다.
 - 챗봇 id 56333은 계정에 있으나 "API 호출이 비활성화"(403, code 105)였고 56337·56338은 없습니다(404). 새로 만든 경험 인터뷰 챗봇이 56333이라면 스튜디오에서 "API로 이 챗봇 호출하기"를 켜야 합니다.
 - 경험 인터뷰 챗봇은 56366입니다. 처음엔 "API 호출이 비활성화"(403, code 105)였고, 스튜디오에서 "API로 이 챗봇 호출하기"를 켠 뒤 200으로 응답했습니다(모델 `gpt-6-luna`, 1턴 0.88 크레딧). `CHATKHU_BOT_INTERVIEW=56366`으로 4개 챗봇 id가 모두 채워졌습니다.
+
+## 음성 실측 (2026-10-25)
+
+- TTS `POST /audio/speech/` 본문 `{model:"gemini-3.8-flash-tts", input}`. `voice`를 비우면 기본 화자를 쓰고, OpenAI식 이름("alloy")을 넣으면 400 "No matching speaker voice"입니다. `response_format`은 무시되고 항상 `audio/pcm`(헤더 없는 24kHz 16bit mono PCM)이 옵니다. 그래서 `api/tts.ts`가 WAV 헤더를 붙여 `audio/wav`로 내려 줍니다. 24kHz가 맞는지는 만들어진 WAV를 STT에 되돌려 보내 같은 문장이 나오는 것으로 확인했습니다. 36자 문장이 6.2초였습니다.
+- STT `POST /audio/transcriptions/` multipart `file`(wav 16kHz mono) + `model`. 모델은 `stt-async-v5`만 됩니다(`whisper-1`은 404, 모델 생략은 422). 응답은 `{operation_id, status:"processing", model, duration_seconds, credits_charged}`이고, `GET /audio/transcriptions/{operation_id}/`가 `{status:"completed", text, segments[{speaker,text,start_ms,end_ms}], duration_seconds}`를 돌려줍니다. 6.8초 음성이 2초 안에 완료됐고 받아쓰기는 글자 하나 틀리지 않았습니다.
+- STT 비용은 `credits_charged`로 옵니다. 6.77초에 0.677이므로 1초당 0.1, 60초 답변이면 약 6 크레딧입니다. `api/stt.ts`는 이 값을 그대로 기록합니다.
+- 오디오 모델 목록(404 메시지에 포함): gemini-2.5-flash-preview-tts, gemini-2.5-pro-preview-tts, gemini-3.1-flash-tts-preview, gemini-3.8-flash-tts, lyria-3-pro-preview, lyria-3-clip-preview, elevenlabs-music, elevenlabs-sfx, stt-async-v5.
