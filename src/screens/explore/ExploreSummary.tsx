@@ -25,7 +25,7 @@ export function ExploreSummary() {
       showToast(how === 'shared' ? '공유했어요' : '이미지로 저장했어요');
     } catch {
       try {
-        await navigator.clipboard.writeText(`쿠키가 발견한 키워드: ${result.keywords.join(', ')}\n${result.traits.map((t) => `- ${t}`).join('\n')}`);
+        await navigator.clipboard.writeText(`루다가 발견한 키워드: ${result.keywords.join(', ')}\n${result.traits.map((t) => `- ${t}`).join('\n')}`);
         showToast('이미지 대신 글로 복사했어요');
       } catch {
         showToast('이 브라우저에서는 저장할 수 없어요');
@@ -50,7 +50,7 @@ export function ExploreSummary() {
         <section className="rise rounded-card bg-lavender p-5">
           <h2 className="flex items-center gap-1.5 text-body font-semibold text-ink">
             <Icon name="sparkle" size={16} className="text-primary" />
-            쿠키가 발견한 너의 키워드
+            루다가 발견한 너의 키워드
           </h2>
           <div className="mt-3 flex flex-wrap gap-2">
             {result.keywords.map((keyword, i) => (

@@ -111,7 +111,7 @@ export function MockDetail() {
                   <div className="mt-3 rounded-tile bg-lavender px-3 py-2.5">
                     <p className="flex items-center gap-1 text-small font-semibold text-primary">
                       <Icon name="bulb" size={14} />
-                      쿠키의 추천 답변 방향
+                      루다의 추천 답변 방향
                     </p>
                     <ul className="mt-1 space-y-0.5">
                       {d.suggest.map((s) => (

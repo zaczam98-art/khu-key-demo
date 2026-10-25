@@ -1,4 +1,4 @@
-// 홈의 선제 메시지. "앱을 열면 쿠키가 먼저 말해요." 규칙은 코드로 정합니다. (CLAUDE.md 9절)
+// 홈의 선제 메시지. "앱을 열면 루다가 먼저 말해요." 규칙은 코드로 정합니다. (CLAUDE.md 9절)
 import type { Application, Experience, MockSession, Profile, Task } from './db';
 import { daysUntil } from './dday';
 import { greetingByHour } from './greeting';

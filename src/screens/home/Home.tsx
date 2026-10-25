@@ -10,7 +10,7 @@ import { useAsync } from '../../lib/hooks';
 import { buildNudge } from '../../lib/nudge';
 import { useAppStore } from '../../store';
 
-// 홈. 앱을 열면 쿠키가 먼저 말합니다. 선제 메시지와 일정은 코드 규칙으로 정합니다. (CLAUDE.md 9절)
+// 홈. 앱을 열면 루다가 먼저 말합니다. 선제 메시지와 일정은 코드 규칙으로 정합니다. (CLAUDE.md 9절)
 export function Home() {
   const mode = useAppStore((s) => s.mode);
   const { data, loading, reload } = useAsync(async () => {
@@ -31,7 +31,7 @@ export function Home() {
     reload();
   };
   const cards: { to: string; icon: IconName; title: string; desc: string }[] = [
-    { to: '/explore', icon: 'compass', title: '직무 탐색', desc: data?.profile?.targetJobs.length ? `관심 직무 ${data.profile.targetJobs.length}개` : '쿠키와 대화로 찾기' },
+    { to: '/explore', icon: 'compass', title: '직무 탐색', desc: data?.profile?.targetJobs.length ? `관심 직무 ${data.profile.targetJobs.length}개` : '루다와 대화로 찾기' },
     { to: '/profile', icon: 'user', title: '경험 카드', desc: data?.experiences.length ? `${data.experiences.length}개 정리됨` : '첫 카드 만들기' },
     { to: '/essay', icon: 'doc', title: '자소서', desc: data?.applications.length ? `지원 ${data.applications.length}건` : '지원 건 추가' },
     { to: '/mock', icon: 'mic', title: '모의 면접', desc: data?.sessions.length ? `${data.sessions.length}회 연습` : '첫 연습 시작' },

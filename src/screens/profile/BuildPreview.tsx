@@ -127,7 +127,7 @@ export function BuildDone() {
         프로필이 저장됐어! 💜
       </h1>
       <p className="rise mt-3 whitespace-pre-line text-center text-[0.875rem] leading-relaxed text-muted" style={{ animationDelay: '350ms' }}>
-        {'앞으로도 새로운 경험이 생기면\n언제든 쿠키에게 찾아와서\n추가해줘.\n지금까지 정말 잘 해왔어! ✨'}
+        {'앞으로도 새로운 경험이 생기면\n언제든 루다에게 찾아와서\n추가해줘.\n지금까지 정말 잘 해왔어! ✨'}
       </p>
       <div className="flex-1" />
       <button type="button" onClick={() => nav('/profile', { viewTransition: true })} className="btn-primary rise w-full" style={{ animationDelay: '500ms' }}>

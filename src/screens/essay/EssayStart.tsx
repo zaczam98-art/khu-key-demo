@@ -3,7 +3,7 @@ import { db } from '../../lib/db';
 import { useAsync } from '../../lib/hooks';
 import { vocative } from '../../lib/nudge';
 
-// 자소서 1. 작성 시작 (자유 대화). 칩은 화면을 열고, 입력은 쿠키와 대화합니다. (design/03_자소서.png 1번)
+// 자소서 1. 작성 시작 (자유 대화). 칩은 화면을 열고, 입력은 루다와 대화합니다. (design/03_자소서.png 1번)
 export function EssayStart() {
   const { data } = useAsync(async () => {
     const [profile, apps] = await Promise.all([db.profile.get('me'), db.applications.count()]);
@@ -18,5 +18,5 @@ export function EssayStart() {
     { label: data?.apps ? `이전에 써둔 자소서 수정하고 싶어 (${data.apps}건)` : '이전에 써둔 자소서 수정하고 싶어', to: '/essay/list' },
   ];
   if (data === undefined) return <div className="p-4"><div className="skeleton h-40 rounded-card" /></div>;
-  return <ChatShell bot="essay" intro={intro} title="쿠키 💜" noBack quickActions={actions} maxTurns={99} />;
+  return <ChatShell bot="essay" intro={intro} title="루다 💜" noBack quickActions={actions} maxTurns={99} />;
 }

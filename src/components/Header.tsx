@@ -37,7 +37,7 @@ export function PageTitle({ title, right }: { title: string; right?: ReactNode }
   );
 }
 
-export function ChatHeader({ expr = 'default', name = '쿠키', back, online = true, noBack = false }: { expr?: Expr; name?: string; back?: string; online?: boolean; noBack?: boolean }) {
+export function ChatHeader({ expr = 'default', name = '루다', back, online = true, noBack = false }: { expr?: Expr; name?: string; back?: string; online?: boolean; noBack?: boolean }) {
   return (
     <header className="sticky top-0 z-10 flex h-14 items-center gap-2 bg-canvas/95 px-4 backdrop-blur">
       {noBack ? <span className="w-2" /> : <BackButton to={back} />}

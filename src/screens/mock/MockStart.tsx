@@ -20,7 +20,7 @@ export function MockStart() {
   return (
     <div className="flex min-h-full flex-col bg-gradient-to-b from-lavender via-canvas to-canvas">
       <TitleHeader
-        title="쿠키 AI 면접"
+        title="루다 AI 면접"
         back="/"
         close
         right={

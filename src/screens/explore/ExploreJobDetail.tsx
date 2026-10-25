@@ -66,7 +66,7 @@ export function ExploreJobDetail() {
         </div>
         {resultJob?.why && (
           <p className="rise mt-4 rounded-card bg-lavender px-4 py-3 text-small text-ink" style={{ animationDelay: '80ms' }}>
-            <span className="font-semibold text-primary">쿠키의 추천 이유 </span>
+            <span className="font-semibold text-primary">루다의 추천 이유 </span>
             {resultJob.why}
           </p>
         )}

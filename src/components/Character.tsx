@@ -17,7 +17,7 @@ export function Character({
       src={`${import.meta.env.BASE_URL}char/${expr}.png`}
       width={size}
       height={size}
-      alt="쿠키"
+      alt="루다"
       draggable={false}
       className={`select-none ${float ? 'float' : ''} ${className}`}
     />

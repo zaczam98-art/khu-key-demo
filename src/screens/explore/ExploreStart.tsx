@@ -38,7 +38,7 @@ export function ExploreStart() {
         <Character expr="smile" size={240} float />
       </div>
       <div className="card rise text-center" style={{ animationDelay: '120ms' }}>
-        <h1 className="text-title text-ink">안녕! 나는 쿠키야 👋</h1>
+        <h1 className="text-title text-ink">안녕! 나는 루다야 👋</h1>
         <p className="mt-3 whitespace-pre-line text-body text-muted">{'너와 함께 딱 맞는 직무를\n찾아볼게.\n편하게 이야기해줘!'}</p>
         <button type="button" onClick={() => nav('/explore/chat', { viewTransition: true })} className="btn-primary mt-6 w-full">
           {hasLog ? '이어서 이야기하기' : '직무 탐색 시작하기'}

@@ -9,7 +9,7 @@ export async function POST(req: Request): Promise<Response> {
   const messages = (body?.messages ?? []).filter((m) => (m.role === 'user' || m.role === 'assistant') && typeof m.content === 'string');
   if (!messages.length) return json({ error: 'messages required' }, 400);
   const anon = req.headers.get('x-anon-id') ?? 'anon';
-  const transcript = messages.map((m) => `${m.role === 'user' ? '사용자' : '쿠키'}: ${m.content}`).join('\n');
+  const transcript = messages.map((m) => `${m.role === 'user' ? '사용자' : '루다'}: ${m.content}`).join('\n');
   try {
     const r = await completeJson<ExploreResult>(
       EXPLORE_EXTRACT_SYSTEM,

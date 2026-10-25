@@ -1,5 +1,5 @@
 // /api/extract 지시문. 바꾸면 docs/prompts.md 에도 기록합니다. (CLAUDE.md 12절)
-export const EXPLORE_EXTRACT_SYSTEM = `다음은 취업 준비생(사용자)과 AI 커리어 메이트 쿠키의 대화다. 대화에 실제로 나온 내용만 근거로 아래 세 가지를 JSON으로만 출력한다. 대화에 없는 사실을 만들지 않는다.
+export const EXPLORE_EXTRACT_SYSTEM = `다음은 취업 준비생(사용자)과 AI 커리어 메이트 루다의 대화다. 대화에 실제로 나온 내용만 근거로 아래 세 가지를 JSON으로만 출력한다. 대화에 없는 사실을 만들지 않는다.
 
 (1) keywords: 흥미·강점 키워드 4~6개. 각 12자 이내의 명사구.
 (2) traits: 성향 문장 4개. 각 40자 이내. "~을 좋아함", "~에서 보람을 느낌"처럼 끝맺는다.

@@ -33,7 +33,7 @@ export function SettingsSheet({ open, onClose }: { open: boolean; onClose: () =>
   };
   const test = async () => {
     try {
-      await showLocalNotification('쿠키', '앱을 열면 쿠키가 먼저 말해요.');
+      await showLocalNotification('쿠키', '앱을 열면 루다가 먼저 말해요.');
     } catch {
       showToast('알림을 보낼 수 없어요');
     }

@@ -22,7 +22,7 @@ export type ChatShellProps = {
   progress?: number; // 0~1
   back?: string;
   title?: string;
-  persona?: { name: string; expr: Expr }; // 면접관처럼 쿠키가 아닌 상대
+  persona?: { name: string; expr: Expr }; // 면접관처럼 루다가 아닌 상대
   finishChip?: string; // 마무리 칩 문구
   finishEvent?: string; // 마무리 칩이 보낼 이벤트 이름
   logKey?: string; // 로그 저장 키 (기본 log:<bot>)
@@ -36,7 +36,7 @@ const formatTime = (iso: string) => {
 };
 const closeInTime = (a: ChatTurn, b: ChatTurn) => Math.abs(new Date(a.at).getTime() - new Date(b.at).getTime()) < 2 * 60_000;
 
-// 쿠키 말풍선 안의 "- 선택지" 줄을 칩으로 보여 줍니다. (시안 4번 화면의 업무 스타일 선택지)
+// 루다 말풍선 안의 "- 선택지" 줄을 칩으로 보여 줍니다. (시안 4번 화면의 업무 스타일 선택지)
 const bulletLines = (text?: string) =>
   (text ?? '')
     .split('\n')
@@ -44,7 +44,7 @@ const bulletLines = (text?: string) =>
     .map((line) => line.replace(/^[-]\s+/, '').trim())
     .slice(0, 4);
 
-// 새로 온 쿠키 말풍선을 글자 단위로 보여 줍니다. 실제 연결에서 스트리밍 응답을 붙일 때도 같은 자리입니다.
+// 새로 온 루다 말풍선을 글자 단위로 보여 줍니다. 실제 연결에서 스트리밍 응답을 붙일 때도 같은 자리입니다.
 function TypedText({ text, onDone }: { text: string; onDone: () => void }) {
   const [shown, setShown] = useState(0);
   const done = shown >= text.length;
@@ -284,7 +284,7 @@ export function ChatShell({ bot, intro, systemHint, quickReplies, quickActions, 
             grow(e.target);
           }}
           onKeyDown={onKeyDown}
-          placeholder={persona ? `${persona.name}에게 답하기...` : '쿠키에게 메시지 보내기...'}
+          placeholder={persona ? `${persona.name}에게 답하기...` : '루다에게 메시지 보내기...'}
           enterKeyHint="send"
           autoComplete="off"
           aria-label="메시지 입력"

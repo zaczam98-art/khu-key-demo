@@ -37,7 +37,7 @@ export async function POST(req: Request): Promise<Response> {
     if (req.headers.get('x-push-secret') !== (process.env.PUSH_SECRET || '')) return json({ error: 'forbidden' }, 403);
     if (!publicKey || !privateKey) return json({ sent: 0, demo: true, reason: 'VAPID 키가 없어요' });
     webpush.setVapidDetails(process.env.VAPID_SUBJECT || 'mailto:admin@example.com', publicKey, privateKey);
-    const payload = JSON.stringify({ title: body.title ?? '쿠키', body: body.body ?? '앱을 열면 쿠키가 먼저 말해요.' });
+    const payload = JSON.stringify({ title: body.title ?? '쿠키', body: body.body ?? '앱을 열면 루다가 먼저 말해요.' });
     const subs = await all();
     const results = await Promise.allSettled(subs.map((s) => webpush.sendNotification(s, payload)));
     return json({ sent: results.filter((r) => r.status === 'fulfilled').length, total: subs.length, demo: false });

@@ -44,7 +44,7 @@ export function Welcome() {
         <Character expr="smile" size={220} float />
       </div>
       <form onSubmit={finish} className="card rise">
-        <h1 className="text-title text-ink">안녕! 나는 쿠키야 👋</h1>
+        <h1 className="text-title text-ink">안녕! 나는 루다야 👋</h1>
         <p className="mt-2 text-body text-muted">너를 뭐라고 부르면 좋을까? 닉네임만 알려 줘. 실명이나 연락처는 묻지 않아.</p>
         <input
           value={name}

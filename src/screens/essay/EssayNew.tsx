@@ -146,7 +146,7 @@ export function EssayNew() {
                   </span>
                 ))}
               </div>
-              <p className="mt-3 text-caption text-muted">초안을 쓸 때 이 키워드가 2개 이상 들어가도록 쿠키가 챙겨요.</p>
+              <p className="mt-3 text-caption text-muted">초안을 쓸 때 이 키워드가 2개 이상 들어가도록 루다가 챙겨요.</p>
             </section>
           )}
           {tab === '자소서 문항' && (
@@ -215,7 +215,7 @@ export function EssayNew() {
         </div>
         <button type="submit" disabled={analyzing} className="btn-primary w-full">
           {analyzing ? <Spinner /> : <Icon name="wand" size={18} />}
-          쿠키가 공고 분석하기
+          루다가 공고 분석하기
         </button>
       </form>
     </div>

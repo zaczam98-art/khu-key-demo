@@ -12,7 +12,7 @@ import { recordingToText, speak, stopSpeaking, useRecorder } from '../../lib/voi
 import { useAppStore } from '../../store';
 import { readMockSetup } from './MockSetup';
 
-// 면접 3~7. 면접관 쿠키가 묻고, 답변은 녹음(받아쓰기)하거나 글로 합니다. (design/04_면접.png 3~7번)
+// 면접 3~7. 면접관 루다가 묻고, 답변은 녹음(받아쓰기)하거나 글로 합니다. (design/04_면접.png 3~7번)
 const LOG = 'log:mock';
 const FIRST_QUESTION = 'Q1. 자기소개를 해주세요.\n(1분 이내로 부탁드립니다.)';
 const mmss = (s: number) => `${String(Math.floor(s / 60)).padStart(2, '0')}:${String(s % 60).padStart(2, '0')}`;

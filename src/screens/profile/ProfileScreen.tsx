@@ -63,7 +63,7 @@ export function ProfileScreen() {
             경험 카드 {cards.length ? <span className="text-muted">{cards.length}</span> : null}
           </SectionTitle>
           {cards.length === 0 ? (
-            <EmptyState expr="wink" title="아직 경험 카드가 없어" desc={'쿠키와 10분만 이야기하면\n경험이 카드로 정리되고 강점까지 나와.'} action={{ label: '프로필 구축 시작하기', to: '/profile/build' }} />
+            <EmptyState expr="wink" title="아직 경험 카드가 없어" desc={'루다와 10분만 이야기하면\n경험이 카드로 정리되고 강점까지 나와.'} action={{ label: '프로필 구축 시작하기', to: '/profile/build' }} />
           ) : (
             <ul className="space-y-2">
               {cards.map((c, i) => (
@@ -116,7 +116,7 @@ export function ProfileScreen() {
               ))}
             </ul>
           ) : (
-            <p className="text-small text-muted">카드 {cards.length}개에서 자주 드러난 역량이야. "다시 분석"을 누르면 쿠키가 강점을 정리해 줘.</p>
+            <p className="text-small text-muted">카드 {cards.length}개에서 자주 드러난 역량이야. "다시 분석"을 누르면 루다가 강점을 정리해 줘.</p>
           )}
           <div className="mt-3 flex flex-wrap gap-2">
             {skills.map((s, i) => (

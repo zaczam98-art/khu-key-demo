@@ -1,5 +1,5 @@
 {
-  "note": "자소서 체험 대본(design/03_자소서.png). replies 는 자소서 시작 화면의 쿠키 답변, post 는 /api/job-post 와 /api/extract-post, draft 는 /api/essay-draft(mode draft), feedback 은 mode feedback, revise 는 mode revise 의 체험 응답입니다.",
+  "note": "자소서 체험 대본(design/03_자소서.png). replies 는 자소서 시작 화면의 루다 답변, post 는 /api/job-post 와 /api/extract-post, draft 는 /api/essay-draft(mode draft), feedback 은 mode feedback, revise 는 mode revise 의 체험 응답입니다.",
   "replies": [
     ["좋아! 그 기업 공고 링크가 있으면 붙여 줘.\n없으면 회사 이름과 직무만 알려 줘도\n문항부터 같이 정리할 수 있어."],
     ["알겠어. 지원 건 추가 화면에서\n공고를 가져오면 키워드와 문항을 뽑아 줄게!"]

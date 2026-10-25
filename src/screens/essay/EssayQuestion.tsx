@@ -268,7 +268,7 @@ export function EssayQuestionScreen() {
                     >
                       <span className="flex items-center gap-2">
                         <Badge tone={v.model === 'me' ? 'line' : 'soft'}>v{v.ver}</Badge>
-                        <span className="text-small text-muted">{v.model === 'me' ? '내 수정' : v.model === 'demo' ? '체험' : '쿠키'} · {v.body.length}자</span>
+                        <span className="text-small text-muted">{v.model === 'me' ? '내 수정' : v.model === 'demo' ? '체험' : '루다'} · {v.body.length}자</span>
                       </span>
                       <span className="mt-2 line-clamp-2 block text-[0.875rem] text-ink">{v.body}</span>
                     </button>
@@ -293,7 +293,7 @@ export function EssayQuestionScreen() {
               <section className="card rise mt-3">
                 <h2 className="flex items-center gap-1.5 text-body font-semibold text-ink">
                   <Icon name="bulb" size={16} className="text-warn" />
-                  쿠키의 피드백
+                  루다의 피드백
                 </h2>
                 <ul className="mt-3 space-y-2">
                   {(points.length ? points : [q.feedback ?? '아직 피드백이 없어요.']).map((p, i) => (
@@ -413,7 +413,7 @@ export function EssayQuestionScreen() {
             <div className="mt-3 rounded-card bg-lavender px-4 py-3">
               <p className="flex items-center gap-1 text-small font-semibold text-primary">
                 <Icon name="bulb" size={14} />
-                쿠키의 추가 질문
+                루다의 추가 질문
               </p>
               <p className="mt-1 text-[0.875rem] leading-relaxed text-ink">{detail.missing[0] ?? '이 경험에서 가장 어려웠던 점은 무엇이었고, 어떻게 해결했는지 구체적으로 말해줄 수 있을까? 결과는 어땠는지도 궁금해!'}</p>
             </div>

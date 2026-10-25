@@ -2,7 +2,7 @@
 import { chat, isBot, type Msg } from '../../server/lib/chatkhu';
 import { json } from '../../server/lib/http';
 
-const RECENT = 16; // 최근 8턴(사용자+쿠키 쌍)만 보냅니다. (CLAUDE.md 12절)
+const RECENT = 16; // 최근 8턴(사용자+루다 쌍)만 보냅니다. (CLAUDE.md 12절)
 
 export async function POST(req: Request): Promise<Response> {
   const url = new URL(req.url);

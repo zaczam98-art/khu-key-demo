@@ -48,7 +48,7 @@ export async function renderShareCard(result: ExploreResult, nickname?: string):
   ctx.fillText('KHU:KEY', 96, 150);
   ctx.fillStyle = '#222';
   ctx.font = font(64, 700);
-  ctx.fillText(nickname ? `쿠키가 발견한 ${nickname}의 키워드` : '쿠키가 발견한 나의 키워드', 96, 260);
+  ctx.fillText(nickname ? `루다가 발견한 ${nickname}의 키워드` : '루다가 발견한 나의 키워드', 96, 260);
 
   // 키워드 칩
   ctx.font = font(38, 600);
@@ -90,7 +90,7 @@ export async function renderShareCard(result: ExploreResult, nickname?: string):
   y += 90;
   ctx.font = font(48, 700);
   ctx.fillStyle = '#222';
-  ctx.fillText('쿠키의 추천 직무', 96, y);
+  ctx.fillText('루다의 추천 직무', 96, y);
   y += 30;
   for (const job of result.jobs) {
     ctx.fillStyle = '#FFFFFF';

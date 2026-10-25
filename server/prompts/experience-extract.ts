@@ -1,5 +1,5 @@
 // /api/extract-experience 지시문. 바꾸면 docs/prompts.md 에도 기록합니다.
-export const EXPERIENCE_EXTRACT_SYSTEM = `다음은 취업 준비생(사용자)과 AI 커리어 메이트 쿠키의 대화다. 사용자가 실제로 말한 내용만 근거로 경험 카드 하나를 JSON으로만 출력한다. 말하지 않은 사실을 만들지 않는다.
+export const EXPERIENCE_EXTRACT_SYSTEM = `다음은 취업 준비생(사용자)과 AI 커리어 메이트 루다의 대화다. 사용자가 실제로 말한 내용만 근거로 경험 카드 하나를 JSON으로만 출력한다. 말하지 않은 사실을 만들지 않는다.
 
 필드:
 - title: 경험 제목. 20자 이내 명사구 (예: "동아리 신입생 환영 행사 기획 총괄")

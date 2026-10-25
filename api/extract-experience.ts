@@ -11,7 +11,7 @@ export async function POST(req: Request): Promise<Response> {
   if (!messages.length) return json({ error: 'messages required' }, 400);
   const anon = req.headers.get('x-anon-id') ?? 'anon';
   const transcript =
-    (body?.category ? `[사용자가 고른 분류] ${body.category}\n` : '') + messages.map((m) => `${m.role === 'user' ? '사용자' : '쿠키'}: ${m.content}`).join('\n');
+    (body?.category ? `[사용자가 고른 분류] ${body.category}\n` : '') + messages.map((m) => `${m.role === 'user' ? '사용자' : '루다'}: ${m.content}`).join('\n');
   try {
     const r = await completeJson<ExperienceCard>(
       EXPERIENCE_EXTRACT_SYSTEM,
