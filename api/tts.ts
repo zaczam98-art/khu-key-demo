@@ -1,7 +1,7 @@
 // POST /api/tts  { text } -> audio/mpeg (ChatKHU /audio/speech/)  |  204 (키 없음: 브라우저 음성 합성으로 대체)
 // 요청 본문은 OpenAI 호환({model, input, voice})으로 가정했고 실측 전입니다(docs/chatkhu-api.md). input 은 4,000자 제한.
-import { apiKey, gatewayBase, overCap, record } from '../server/lib/chatkhu';
-import { json } from '../server/lib/http';
+import { apiKey, gatewayBase, overCap, record } from '../server/lib/chatkhu.js';
+import { json } from '../server/lib/http.js';
 
 export async function POST(req: Request): Promise<Response> {
   const body = (await req.json().catch(() => null)) as { text?: string } | null;

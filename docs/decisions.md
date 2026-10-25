@@ -91,3 +91,11 @@
 - 팀 ChatKHU 키와 스튜디오 챗봇 3개(직무 탐색 56334, 자소서 56335, 면접 56336)를 `.env.local`에 넣었고 실제 호출이 됩니다. 실측은 `docs/chatkhu-api.md` 맨 아래에 있습니다.
 - 이름을 나눴습니다. 앱은 "쿠키", 챗봇·캐릭터는 "루다"입니다. 스튜디오 챗봇이 자기를 루다라고 소개하므로 앱 화면의 화자 자리(채팅 헤더, 첫 말풍선 "나는 루다야", "루다가 발견한 키워드", 입력창 안내, 체험 대본, 서버 지시문의 페르소나)를 루다로 바꿨습니다. 앱 제목, 매니페스트, 공유 제목, 알림 제목은 쿠키 그대로입니다.
 - 챗봇 말투는 존댓말을 허용하기로 했고, 마크다운은 스튜디오 지시문에서 금지했습니다. 앱 말풍선은 마크다운을 그리지 않으므로 둘이 맞습니다.
+
+## 2026-10-25 (Vercel 실제 배포)
+
+- 팀 Vercel 계정(khukey)에 저장소를 연결해 배포했습니다. 첫 배포는 Deployment Protection(Vercel Authentication) 때문에 밖에서 401이 났고, 프로젝트 설정에서 껐습니다.
+- 그 뒤 모든 `/api` 함수가 FUNCTION_INVOCATION_FAILED(500)로 죽었습니다. 원인은 package.json 의 `"type": "module"` 때문에 Vercel 이 API 를 Node ESM 으로 돌리는데, 확장자 없는 상대 import(`'../server/lib/chatkhu'`)와 JSON import 가 Node ESM 에서는 허용되지 않기 때문입니다. tsc 로 같은 방식으로 내보내 로컬 Node 24 에서 같은 오류를 재현했습니다.
+- 고친 것: api·server 의 상대 import 40건에 `.js` 확장자를 붙였고(Vite 와 tsc 는 `.js` 를 `.ts` 로 찾습니다), 서버의 체험 JSON 은 `createRequire` 로 읽습니다(타입은 `typeof import()` 로 유지). 브라우저와 서버가 같이 쓰는 `src/lib/demoScript.ts` 는 JSON 을 import 하지 않고 인자로 받습니다. `vercel.json` 의 `includeFiles` 로 `server/demo/*.json` 을 함수에 같이 넣습니다.
+- 버린 안: `"type": "module"` 제거(설정 파일이 전부 ESM 이라 영향이 큼), 함수를 esbuild 로 미리 묶기(Vercel 이 `api/*.ts` 를 그대로 함수로 잡아 충돌).
+- 공유 메타 주소는 Vercel 빌드에서 `VERCEL_PROJECT_PRODUCTION_URL` 을 자동으로 씁니다.

@@ -13,7 +13,7 @@ describe('경험 인터뷰 체험 대본', () => {
   it('분류마다 카드가 다르고 스키마를 통과한다', () => {
     const titles = new Set<string>();
     for (const category of CATEGORIES) {
-      const script = interviewScript(category);
+      const script = interviewScript(interviewDemo, category);
       const card = ExperienceCardSchema.parse(script.result);
       expect(card.category).toBe(category);
       expect(script.userScript).toHaveLength(3);
@@ -25,7 +25,7 @@ describe('경험 인터뷰 체험 대본', () => {
   });
 
   it('모르는 분류는 기본 대본을 쓴다', () => {
-    expect(interviewScript('없는분류').result).toBe(interviewDemo.result);
-    expect(interviewScript(undefined).userScript).toBe(interviewDemo.userScript);
+    expect(interviewScript(interviewDemo, '없는분류').result).toBe(interviewDemo.result);
+    expect(interviewScript(interviewDemo, undefined).userScript).toBe(interviewDemo.userScript);
   });
 });

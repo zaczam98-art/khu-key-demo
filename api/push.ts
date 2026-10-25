@@ -2,7 +2,7 @@
 //   POST /api/push { subscription }            구독 저장
 //   POST /api/push { send: true, title, body } (x-push-secret 헤더) 저장된 구독 전부에 발송
 import webpush from 'web-push';
-import { json } from '../server/lib/http';
+import { json } from '../server/lib/http.js';
 
 type Sub = { endpoint: string; keys: { p256dh: string; auth: string } };
 const mem = new Map<string, Sub>();

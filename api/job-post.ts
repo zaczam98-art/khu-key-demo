@@ -1,7 +1,7 @@
 // POST /api/job-post  { url } -> { text, demo }
 // 사용자가 넣은 링크 1건만 가져옵니다. 로그인 우회·대량 수집은 하지 않습니다. (CLAUDE.md 9절) 실패하면 붙여넣기를 안내합니다.
-import { demoData } from '../server/lib/chatkhu';
-import { json } from '../server/lib/http';
+import { demoData } from '../server/lib/chatkhu.js';
+import { json } from '../server/lib/http.js';
 
 function htmlToText(html: string): string {
   return html

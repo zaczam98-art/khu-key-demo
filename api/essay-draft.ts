@@ -1,9 +1,9 @@
 // POST /api/essay-draft  { mode: 'draft'|'feedback'|'revise', company, job, keywords, values, question, limit, experiences, body?, points? }
 //   -> { result: {body, feedback, points, examples}, credits?, demo }
-import { completeJson, demoData } from '../server/lib/chatkhu';
-import { json } from '../server/lib/http';
-import { ESSAY_DRAFT_SYSTEM, ESSAY_FEEDBACK_SYSTEM, ESSAY_REVISE_SYSTEM } from '../server/prompts/essay-draft';
-import { EssayDraftSchema, essayDraftJsonSchema, type EssayDraft } from '../src/lib/schema';
+import { completeJson, demoData } from '../server/lib/chatkhu.js';
+import { json } from '../server/lib/http.js';
+import { ESSAY_DRAFT_SYSTEM, ESSAY_FEEDBACK_SYSTEM, ESSAY_REVISE_SYSTEM } from '../server/prompts/essay-draft.js';
+import { EssayDraftSchema, essayDraftJsonSchema, type EssayDraft } from '../src/lib/schema.js';
 
 type Body = {
   mode?: 'draft' | 'feedback' | 'revise';

@@ -1,8 +1,8 @@
 // POST /api/stt  multipart { file: wav(16kHz mono), turn?: number } -> { text, demo }
 // ChatKHU STT(/audio/transcriptions/)로 넘깁니다. 요청 본문 형식은 OpenAI 호환(multipart file, model)으로 가정했고 실측 전입니다(docs/chatkhu-api.md).
 // 키가 없으면 체험 대본의 n번째 답변을 "받아쓴 것처럼" 돌려줍니다.
-import { apiKey, demoData, gatewayBase, overCap, record } from '../server/lib/chatkhu';
-import { json } from '../server/lib/http';
+import { apiKey, demoData, gatewayBase, overCap, record } from '../server/lib/chatkhu.js';
+import { json } from '../server/lib/http.js';
 
 type Transcription = { text?: string; operation_id?: string; status?: string; result?: { text?: string } };
 

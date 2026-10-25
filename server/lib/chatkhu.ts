@@ -1,15 +1,22 @@
 // ChatKHU 호출은 전부 이 파일을 거칩니다. (CLAUDE.md 4절 서버 공통 규칙)
 // 키 선택, 호출, 사용량 기록, 일일 상한 검사, 실패 시 데모 응답을 여기서 처리합니다.
 // 요청·응답 형식은 docs/chatkhu-api.md 에 적힌 확인 내용을 따릅니다.
-import essayDemo from '../demo/essay.json';
-import exploreDemo from '../demo/explore.json';
-import interviewDemo from '../demo/interview.json';
-import mockDemo from '../demo/mock.json';
-import { COOKIE_ESSAY_SYSTEM } from '../prompts/essay-chat';
-import { COOKIE_EXPLORE_SYSTEM } from '../prompts/explore-chat';
-import { COOKIE_INTERVIEW_SYSTEM } from '../prompts/interview-chat';
-import { COOKIE_MOCK_SYSTEM } from '../prompts/mock-chat';
-import { categoryFromHint, interviewScript } from '../../src/lib/demoScript';
+import { createRequire } from 'node:module';
+import { COOKIE_ESSAY_SYSTEM } from '../prompts/essay-chat.js';
+import { COOKIE_EXPLORE_SYSTEM } from '../prompts/explore-chat.js';
+import { COOKIE_INTERVIEW_SYSTEM } from '../prompts/interview-chat.js';
+import { COOKIE_MOCK_SYSTEM } from '../prompts/mock-chat.js';
+import { categoryFromHint, interviewScript, type InterviewDemo } from '../../src/lib/demoScript.js';
+
+// 체험 대본. Vercel 은 이 파일을 Node ESM 으로 돌리는데 ESM 은 JSON 을 import 할 수 없어 require 로 읽습니다.
+// vercel.json 의 includeFiles 가 server/demo/*.json 을 함수에 같이 넣습니다.
+// 타입은 JSON 파일에서 그대로 가져옵니다(typeof import 는 타입 전용이라 실행 시 import 가 생기지 않습니다).
+const requireJson = createRequire(import.meta.url);
+const loadDemo = <T>(name: string): T => requireJson(`../demo/${name}.json`) as T;
+const essayDemo = loadDemo<typeof import('../demo/essay.json')>('essay');
+const exploreDemo = loadDemo<typeof import('../demo/explore.json')>('explore');
+export const interviewDemo: InterviewDemo & typeof import('../demo/interview.json') = loadDemo('interview');
+const mockDemo = loadDemo<typeof import('../demo/mock.json')>('mock');
 
 export type Msg = { role: 'user' | 'assistant' | 'system'; content: string };
 export type ChatResult = { bubbles: string[]; credits?: number; demo: boolean; reason?: string };
@@ -110,7 +117,7 @@ async function call(path: string, body: unknown): Promise<Completion> {
 
 const userCount = (messages: Msg[]) => messages.filter((m) => m.role === 'user').length;
 function demoBubbles(bot: Bot, messages: Msg[], systemHint?: string): string[] {
-  const replies = bot === 'interview' ? interviewScript(categoryFromHint(systemHint)).replies : DEMO_REPLIES[bot];
+  const replies = bot === 'interview' ? interviewScript(interviewDemo, categoryFromHint(systemHint)).replies : DEMO_REPLIES[bot];
   return replies[Math.min(Math.max(userCount(messages) - 1, 0), replies.length - 1)];
 }
 

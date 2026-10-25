@@ -1,9 +1,9 @@
 // POST /api/score  { messages, type?, job?, company? } -> { result: {scores, evidence, summary, perQuestion}, credits?, demo }
-import { completeJson, demoData, type Msg } from '../server/lib/chatkhu';
-import { json } from '../server/lib/http';
-import { SCORE_SYSTEM_PREFIX } from '../server/prompts/score-extract';
-import { rubricText } from '../src/data/rubric';
-import { ScoreSchema, scoreJsonSchema, type ScoreResult } from '../src/lib/schema';
+import { completeJson, demoData, type Msg } from '../server/lib/chatkhu.js';
+import { json } from '../server/lib/http.js';
+import { SCORE_SYSTEM_PREFIX } from '../server/prompts/score-extract.js';
+import { rubricText } from '../src/data/rubric.js';
+import { ScoreSchema, scoreJsonSchema, type ScoreResult } from '../src/lib/schema.js';
 
 export async function POST(req: Request): Promise<Response> {
   const body = (await req.json().catch(() => null)) as { messages?: Msg[]; type?: string; job?: string; company?: string } | null;

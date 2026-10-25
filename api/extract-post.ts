@@ -1,8 +1,8 @@
 // POST /api/extract-post  { text } -> { result: {summary, keywords, values, deadline, questions}, credits?, demo }
-import { completeJson, demoData } from '../server/lib/chatkhu';
-import { json } from '../server/lib/http';
-import { POST_EXTRACT_SYSTEM } from '../server/prompts/post-extract';
-import { PostExtractSchema, postExtractJsonSchema, type PostExtract } from '../src/lib/schema';
+import { completeJson, demoData } from '../server/lib/chatkhu.js';
+import { json } from '../server/lib/http.js';
+import { POST_EXTRACT_SYSTEM } from '../server/prompts/post-extract.js';
+import { PostExtractSchema, postExtractJsonSchema, type PostExtract } from '../src/lib/schema.js';
 
 export async function POST(req: Request): Promise<Response> {
   const body = (await req.json().catch(() => null)) as { text?: string } | null;

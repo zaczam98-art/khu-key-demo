@@ -10,8 +10,12 @@ export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, fileURLToPath(new URL('.', import.meta.url)), '');
   for (const [k, v] of Object.entries(env)) if (process.env[k] === undefined) process.env[k] = v;
   const base = process.env.VITE_BASE || '/';
-  // index.html 의 공유용 메타 태그(og:url, og:image)가 쓰는 절대 주소. 다른 곳에 올리면 VITE_SITE_URL 로 바꿉니다.
-  if (!process.env.VITE_SITE_URL) process.env.VITE_SITE_URL = 'https://zaczam98-art.github.io/khu-key-demo/';
+  // index.html 의 공유용 메타 태그(og:url, og:image)가 쓰는 절대 주소. Vercel 빌드에서는 프로덕션 도메인을 자동으로 쓰고,
+  // 그 밖에는 Pages 주소입니다. 다른 곳에 올리면 VITE_SITE_URL 로 바꿉니다.
+  if (!process.env.VITE_SITE_URL)
+    process.env.VITE_SITE_URL = process.env.VERCEL_PROJECT_PRODUCTION_URL
+      ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}/`
+      : 'https://zaczam98-art.github.io/khu-key-demo/';
   return {
     base,
     build: {

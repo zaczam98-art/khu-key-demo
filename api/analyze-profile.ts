@@ -1,8 +1,8 @@
 // POST /api/analyze-profile  { cards: [{title, category, role, activities, achievements, learned, skills}] } -> { result: {strengths, summary}, credits?, demo }
-import { completeJson, demoData } from '../server/lib/chatkhu';
-import { json } from '../server/lib/http';
-import { PROFILE_ANALYSIS_SYSTEM } from '../server/prompts/profile-analysis';
-import { ProfileAnalysisSchema, profileAnalysisJsonSchema, type ProfileAnalysis } from '../src/lib/schema';
+import { completeJson, demoData } from '../server/lib/chatkhu.js';
+import { json } from '../server/lib/http.js';
+import { PROFILE_ANALYSIS_SYSTEM } from '../server/prompts/profile-analysis.js';
+import { ProfileAnalysisSchema, profileAnalysisJsonSchema, type ProfileAnalysis } from '../src/lib/schema.js';
 
 type Card = { title: string; category: string; role: string; activities: string[]; achievements: string[]; learned: string[]; skills: string[] };
 

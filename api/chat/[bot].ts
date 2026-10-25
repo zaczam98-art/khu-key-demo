@@ -1,6 +1,6 @@
 // POST /api/chat/:bot  { messages: [{role, content}], systemHint? } -> { bubbles: string[], credits?, demo }
-import { chat, isBot, type Msg } from '../../server/lib/chatkhu';
-import { json } from '../../server/lib/http';
+import { chat, isBot, type Msg } from '../../server/lib/chatkhu.js';
+import { json } from '../../server/lib/http.js';
 
 const RECENT = 16; // 최근 8턴(사용자+루다 쌍)만 보냅니다. (CLAUDE.md 12절)
 

@@ -79,11 +79,11 @@ const userCount = (messages: Msg[]) => messages.filter((m) => m.role === 'user')
 
 // 경험 인터뷰는 화면 문맥(systemHint)의 분류에 맞는 대본을 씁니다. 분류마다 다른 카드가 나오게 하기 위해서입니다.
 export function demoReply(bot: Bot, messages: Msg[], systemHint?: string): string[] {
-  const replies = bot === 'interview' ? interviewScript(categoryFromHint(systemHint)).replies : DEMO_REPLIES[bot];
+  const replies = bot === 'interview' ? interviewScript(interviewDemo, categoryFromHint(systemHint)).replies : DEMO_REPLIES[bot];
   return replies[Math.min(Math.max(userCount(messages) - 1, 0), replies.length - 1)];
 }
 export function demoSuggestion(bot: Bot, messages: Msg[], systemHint?: string): string | undefined {
-  const script = bot === 'interview' ? interviewScript(categoryFromHint(systemHint)).userScript : DEMO_SCRIPT[bot];
+  const script = bot === 'interview' ? interviewScript(interviewDemo, categoryFromHint(systemHint)).userScript : DEMO_SCRIPT[bot];
   return script[userCount(messages)];
 }
 
@@ -107,7 +107,7 @@ export const extractExperience = (messages: Msg[], category?: string) =>
     '/api/extract-experience',
     { messages, category },
     (d) => ExperienceCardSchema.parse(d),
-    () => ExperienceCardSchema.parse(interviewScript(category).result),
+    () => ExperienceCardSchema.parse(interviewScript(interviewDemo, category).result),
     1800,
     '카드 정리에 실패했어요. 다시 시도해 주세요.',
   );

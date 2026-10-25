@@ -1,9 +1,9 @@
 // POST /api/extract-experience  { messages, category? } -> { result: ExperienceCard, credits?, demo }
-import { completeJson, type Msg } from '../server/lib/chatkhu';
-import { json } from '../server/lib/http';
-import { EXPERIENCE_EXTRACT_SYSTEM } from '../server/prompts/experience-extract';
-import { interviewScript } from '../src/lib/demoScript';
-import { ExperienceCardSchema, experienceCardJsonSchema, type ExperienceCard } from '../src/lib/schema';
+import { completeJson, interviewDemo, type Msg } from '../server/lib/chatkhu.js';
+import { json } from '../server/lib/http.js';
+import { EXPERIENCE_EXTRACT_SYSTEM } from '../server/prompts/experience-extract.js';
+import { interviewScript } from '../src/lib/demoScript.js';
+import { ExperienceCardSchema, experienceCardJsonSchema, type ExperienceCard } from '../src/lib/schema.js';
 
 export async function POST(req: Request): Promise<Response> {
   const body = (await req.json().catch(() => null)) as { messages?: Msg[]; category?: string } | null;
@@ -20,7 +20,7 @@ export async function POST(req: Request): Promise<Response> {
       'experience_card',
       anon,
       (data) => ExperienceCardSchema.parse(data),
-      ExperienceCardSchema.parse(interviewScript(body?.category).result),
+      ExperienceCardSchema.parse(interviewScript(interviewDemo, body?.category).result),
     );
     return json({ result: r.data, credits: r.credits, demo: r.demo });
   } catch (e) {
