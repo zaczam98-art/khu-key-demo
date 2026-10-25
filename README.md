@@ -7,7 +7,9 @@
 
 작업 가이드는 `CLAUDE.md`, 협업 규칙은 `AGENTS.md`, 진행 순서는 `docs/roadmap.md`에 있습니다.
 
-## 지금 상태 (2026-10-23)
+## 지금 상태 (2026-10-25)
+
+- 실제 배포 주소(챗봇 연결됨): https://khu-key-demo-three.vercel.app/ (Vercel 프로덕션 도메인. https://khu-key-demo-khukey.vercel.app/ 도 같은 곳. 팀 계정 khukey, main 푸시마다 자동 배포). 체험 모드 전용 주소: https://zaczam98-art.github.io/khu-key-demo/ (GitHub Pages, 서버 없음).
 
 - 2026-10-23 1차 자체 점검: 분류별 체험 카드 9종, 모듈별 늦은 불러오기(첫 로딩 JS 37KB + vendor), 링크 공유 미리보기 메타, 한국어 줄바꿈, 여러 줄 채팅 입력. 자세한 내용은 `docs/decisions.md`.
 - 시안 4장(`design/`)의 40화면이 모두 들어 있습니다. 직무 탐색 10화면, 프로필 구축 10화면(분류 복수 선택 → 인터뷰 → 카드 → 종합 분석 → 미리보기), 자소서 10화면(대화 시작 → 공고 분석 → 경험 매칭·보완 → 초안·첨삭 탭 → 제출 → 다음 단계), 면접 10화면(4갈래 시작 → 설정 → 음성 세션 → 결과 → 상세 피드백 → 합격 엔딩), 그리고 홈·일정·알림.
@@ -59,6 +61,7 @@ CHATKHU_BOT_MOCK=           # 면접관 챗봇 id
 
 - GitHub Pages: `.github/workflows/deploy.yml`이 main 푸시마다 `VITE_BASE=/khu-key-demo/`로 빌드해 올립니다. 서버가 없으므로 체험 모드입니다.
 - Vercel: 저장소를 연결하고 환경변수(`CHATKHU_*`, 선택으로 `KV_*`, `VAPID_*`)를 넣으면 `api/`가 서버 함수로 올라가 실제 모드가 됩니다. `vercel.json`에 SPA 재작성 규칙이 있습니다.
+- Vercel 은 `api/*.ts` 를 Node ESM 으로 돌리므로 api·server 의 상대 import 는 `.js` 확장자를 붙이고, JSON 은 `createRequire` 로 읽습니다. 안 지키면 함수가 FUNCTION_INVOCATION_FAILED 로 죽습니다(docs/decisions.md 2026-10-25).
 
 ## 폴더
 
