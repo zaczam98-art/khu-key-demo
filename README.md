@@ -7,10 +7,11 @@
 
 작업 가이드는 `CLAUDE.md`, 협업 규칙은 `AGENTS.md`, 진행 순서는 `docs/roadmap.md`에 있습니다.
 
-## 지금 상태 (2026-10-25)
+## 지금 상태 (2026-10-26)
 
 - 실제 배포 주소(챗봇 연결됨): https://khu-key-demo-three.vercel.app/ (Vercel 프로덕션 도메인. https://khu-key-demo-khukey.vercel.app/ 도 같은 곳. 팀 계정 khukey, main 푸시마다 자동 배포). 체험 모드 전용 주소: https://zaczam98-art.github.io/khu-key-demo/ (GitHub Pages, 서버 없음).
 
+- 2026-10-26: 홈 배지가 첫 대화 전에도 실제 연결 여부를 보여 줍니다(`GET /api/health`, 크레딧 소모 없음).
 - 2026-10-23 1차 자체 점검: 분류별 체험 카드 9종, 모듈별 늦은 불러오기(첫 로딩 JS 37KB + vendor), 링크 공유 미리보기 메타, 한국어 줄바꿈, 여러 줄 채팅 입력. 자세한 내용은 `docs/decisions.md`.
 - 시안 4장(`design/`)의 40화면이 모두 들어 있습니다. 직무 탐색 10화면, 프로필 구축 10화면(분류 복수 선택 → 인터뷰 → 카드 → 종합 분석 → 미리보기), 자소서 10화면(대화 시작 → 공고 분석 → 경험 매칭·보완 → 초안·첨삭 탭 → 제출 → 다음 단계), 면접 10화면(4갈래 시작 → 설정 → 음성 세션 → 결과 → 상세 피드백 → 합격 엔딩), 그리고 홈·일정·알림.
 - ChatKHU 키와 챗봇 id가 없으면 전부 체험 모드로 돌아갑니다. 대화는 `server/demo/*.json` 대본, 추출·초안·채점·분석은 같은 파일의 예시 결과로 재생되고, 추천 답변이 칩으로 나와 타자 없이 넘길 수 있습니다. 면접의 받아쓰기도 대본 답변으로 대체되고, 질문 읽어 주기는 브라우저 음성으로 됩니다.
@@ -66,7 +67,7 @@ CHATKHU_BOT_MOCK=           # 면접관 챗봇 id
 ## 폴더
 
 ```
-api/            Vercel Functions: chat/[bot], extract, extract-experience, analyze-profile, extract-post, essay-draft, score, job-post, stt, tts, push
+api/            Vercel Functions: health, chat/[bot], extract, extract-experience, analyze-profile, extract-post, essay-draft, score, job-post, stt, tts, push
 server/         lib/chatkhu.ts(호출 한 곳), prompts/(지시문 10종), demo/(체험 대본 4종), dev-api.ts(로컬 /api)
 src/components  ChatShell, Character, Header, TabBar, Icon(Lucide), ui, Toast, InstallBanner, SettingsSheet, ExperienceForm, Splash
 src/screens     home(홈·일정·닉네임), explore(10화면), profile(구축 마법사 10화면 + 카드 상세), essay(시작·목록·추가·상세·문항·다음 단계), mock(시작·설정·세션·결과·상세·기록·엔딩)

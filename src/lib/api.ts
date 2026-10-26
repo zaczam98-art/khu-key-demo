@@ -192,6 +192,18 @@ export async function fetchSpeech(text: string): Promise<Blob | null> {
   }
 }
 
+// 홈이 처음 열릴 때 서버와 키가 있는지 확인합니다. 서버가 없거나(GitHub Pages) 키가 없으면 체험 모드입니다. 크레딧은 들지 않습니다.
+export async function probeLive(): Promise<boolean> {
+  try {
+    const r = await fetch('/api/health', { headers: { 'x-anon-id': anonId() } });
+    if (!r.ok) return false;
+    const j = (await r.json()) as { live?: boolean };
+    return !!j.live;
+  } catch {
+    return false;
+  }
+}
+
 export async function savePushSubscription(subscription: PushSubscriptionJSON): Promise<{ ok: boolean; demo: boolean }> {
   try {
     return await post<{ ok: boolean; demo: boolean }>('/api/push', { subscription });

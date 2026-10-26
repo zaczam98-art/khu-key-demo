@@ -1,9 +1,11 @@
+import { useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Character } from '../../components/Character';
 import { PageTitle } from '../../components/Header';
 import { Icon, type IconName } from '../../components/Icon';
 import { InstallBanner } from '../../components/InstallBanner';
 import { Badge, SectionTitle } from '../../components/ui';
+import { probeLive } from '../../lib/api';
 import { ddayLabel, sortTasks } from '../../lib/dday';
 import { db, type Task } from '../../lib/db';
 import { useAsync } from '../../lib/hooks';
@@ -13,6 +15,18 @@ import { useAppStore } from '../../store';
 // 홈. 앱을 열면 루다가 먼저 말합니다. 선제 메시지와 일정은 코드 규칙으로 정합니다. (CLAUDE.md 9절)
 export function Home() {
   const mode = useAppStore((s) => s.mode);
+  const note = useAppStore((s) => s.note);
+  // 아직 대화를 한 번도 안 했으면 서버에 연결 상태만 물어 배지를 맞춥니다. 대화 뒤에는 실제 응답의 demo 값이 우선합니다.
+  useEffect(() => {
+    if (mode !== null) return;
+    let alive = true;
+    void probeLive().then((live) => {
+      if (alive && useAppStore.getState().mode === null) note(!live);
+    });
+    return () => {
+      alive = false;
+    };
+  }, [mode, note]);
   const { data, loading, reload } = useAsync(async () => {
     const [profile, applications, experiences, tasks, sessions] = await Promise.all([
       db.profile.get('me'),
@@ -39,7 +53,7 @@ export function Home() {
 
   return (
     <div className="flex min-h-full flex-col px-4 pb-6 pt-[max(12px,env(safe-area-inset-top))]">
-      <PageTitle title="홈" right={<Badge tone={mode === 'live' ? 'success' : 'line'}>{mode === 'live' ? 'ChatKHU 연결됨' : '체험 모드'}</Badge>} />
+      <PageTitle title="홈" right={mode === null ? <span className="skeleton h-5 w-16 rounded-full" /> : <Badge tone={mode === 'live' ? 'success' : 'line'}>{mode === 'live' ? 'ChatKHU 연결됨' : '체험 모드'}</Badge>} />
 
       <div className="rise mt-3 flex items-start gap-3">
         <Character expr="smile" size={64} float className="shrink-0 rounded-full bg-lavender" />

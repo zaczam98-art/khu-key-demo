@@ -14,8 +14,8 @@ ChatKHU에 보내는 지시문과 바꾼 이력입니다. 코드의 원문은 `s
 | 자소서 초안·첨삭·전체 수정 | `essay-draft.ts` | `/api/essay-draft` (mode draft/feedback/revise) | json_schema strict |
 | 면접관 대화(대체) | `mock-chat.ts` | `/api/chat/mock` | temperature 0.8 |
 | 면접 채점 | `score-extract.ts` + `src/data/rubric.ts` | `/api/score` | json_schema strict |
-| 답변 받아쓰기 | 지시문 없음 | `/api/stt` → ChatKHU `/audio/transcriptions/` | 본문 형식 실측 전 |
-| 질문 읽어 주기 | 지시문 없음 | `/api/tts` → ChatKHU `/audio/speech/` | 본문 형식 실측 전, 없으면 브라우저 음성 |
+| 답변 받아쓰기 | 지시문 없음 | `/api/stt` → ChatKHU `/audio/transcriptions/` | 모델 `stt-async-v5`, operation_id 폴링 (2026-10-25 실측, docs/chatkhu-api.md) |
+| 질문 읽어 주기 | 지시문 없음 | `/api/tts` → ChatKHU `/audio/speech/` | 모델 `gemini-3.8-flash-tts`, raw PCM 에 WAV 헤더를 붙임 (2026-10-25 실측), 없으면 브라우저 음성 |
 
 ## 1. 직무 탐색 추출 (`/api/extract`)
 

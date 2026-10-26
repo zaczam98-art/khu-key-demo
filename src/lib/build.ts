@@ -27,7 +27,7 @@ export const hasNext = (s: BuildState): boolean => s.index + 1 < s.categories.le
 export const CATEGORY_HINT: Record<ExperienceCategory, string> = {
   동아리: '학술/친목 등',
   학회: '전공/연합 등',
-  학생회: '과/단과대/총학생회 등',
+  학생회: '과/총학생회 등',
   봉사: '봉사활동',
   아르바이트: '매장/사무 등',
   인턴십: '대외활동 포함',
