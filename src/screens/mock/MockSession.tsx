@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Character } from '../../components/Character';
 import { Icon } from '../../components/Icon';
 import { Spinner } from '../../components/ui';
 import { chat, toMsgs } from '../../lib/api';
@@ -14,6 +13,7 @@ import { readMockSetup } from './MockSetup';
 
 // 면접 3~7. 면접관 루다가 묻고, 답변은 녹음(받아쓰기)하거나 글로 합니다. (design/04_면접.png 3~7번)
 const LOG = 'log:mock';
+const BG = `${import.meta.env.BASE_URL}mock/bg-portrait.jpg`;
 const FIRST_QUESTION = 'Q1. 자기소개를 해주세요.\n(1분 이내로 부탁드립니다.)';
 const mmss = (s: number) => `${String(Math.floor(s / 60)).padStart(2, '0')}:${String(s % 60).padStart(2, '0')}`;
 
@@ -151,10 +151,17 @@ export function MockSession() {
         </button>
       </header>
 
-      {/* 면접관 */}
-      <div className="relative flex flex-1 items-end justify-center">
-        <div className="absolute inset-x-6 top-4 h-40 rounded-card bg-surface/50 blur-2xl" aria-hidden="true" />
-        <Character expr="suit" size={300} className={`relative -mb-8 ${busy ? '' : 'float'}`} />
+      {/* 면접관: 면접실 배경(public/mock/bg-portrait.jpg) 위에 정장 루다를 의자에 맞춰 올립니다.
+          배경은 바닥(책상)을 기준으로 폭에 맞춰 깔고 위쪽(천장)이 잘립니다. 책상 부분을 한 번 더 그려 루다가 책상 뒤에 앉은 것처럼 보이게 합니다. */}
+      <div className="relative flex-1 overflow-hidden">
+        <div className="absolute inset-x-0 bottom-0" style={{ aspectRatio: '840 / 1505' }}>
+          <img src={BG} alt="" draggable={false} className="h-full w-full select-none object-cover" />
+          {/* 가운데 정렬은 감싸는 요소가 맡습니다. float 애니메이션이 transform 을 쓰므로 같은 요소에 두면 translate 가 덮입니다. */}
+          <div className="absolute left-1/2 w-[54%] -translate-x-1/2" style={{ bottom: '17%' }}>
+            <img src={`${import.meta.env.BASE_URL}char/suit-cutout.png`} alt="면접관 루다" draggable={false} className={`w-full select-none ${busy ? '' : 'float'}`} />
+          </div>
+          <img src={BG} alt="" draggable={false} aria-hidden="true" className="absolute inset-0 h-full w-full select-none object-cover" style={{ clipPath: 'inset(78.4% 0 0 0)' }} />
+        </div>
         <button type="button" aria-label={muted ? '소리 켜기' : '소리 끄기'} onClick={() => { setMuted((m) => !m); stopSpeaking(); }} className="press absolute right-4 top-2 flex h-10 w-10 items-center justify-center rounded-full bg-surface/80 text-muted shadow-card">
           <Icon name={muted ? 'bell-off' : 'bell'} size={18} />
         </button>
