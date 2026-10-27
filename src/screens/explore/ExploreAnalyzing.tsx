@@ -54,7 +54,7 @@ export function ExploreAnalyzing() {
 
   return (
     <div className="flex min-h-full flex-col bg-canvas">
-      <ChatHeader expr="think" back="/explore/chat" />
+      <ChatHeader expr="laptop" back="/explore/chat" />
       <div className="flex flex-1 flex-col items-center px-6 pt-6">
         <div className="relative flex h-[136px] w-[136px] items-center justify-center">
           <svg width="136" height="136" viewBox="0 0 136 136" className="absolute inset-0 -rotate-90">
@@ -71,7 +71,7 @@ export function ExploreAnalyzing() {
               strokeDashoffset={CIRCUMFERENCE * (1 - ratio)}
             />
           </svg>
-          <Character expr="think" size={96} float />
+          <Character expr="laptop" size={96} float />
           <span className="pop absolute -right-1 top-1 flex h-9 w-9 items-center justify-center rounded-full bg-warn/15 text-warn">
             <Icon name="bulb" size={22} />
           </span>

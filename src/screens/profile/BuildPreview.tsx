@@ -85,7 +85,7 @@ export function BuildUsage() {
       <BuildHeader step={5} back="/profile/build/preview" />
       <div className="flex-1 px-4 pb-6 pt-1">
         <div className="rise flex items-start gap-3">
-          <Character expr="wink" size={48} className="shrink-0 rounded-full bg-lavender" />
+          <Character expr="guide" size={48} className="shrink-0 rounded-full bg-lavender" />
           <div className="bubble-bot">{'이렇게 정리된 경험은\n앞으로 자소서 작성, 면접 준비,\n채용공고 추천 등에 활용돼!\n예를 들어...'}</div>
         </div>
         <ul className="card rise mt-5 space-y-4" style={{ animationDelay: '120ms' }}>
@@ -121,7 +121,7 @@ export function BuildDone() {
         <Icon name="heart" size={16} fill="#F08BB0" className="drift absolute left-[12%] top-[50%] text-[#F08BB0]" />
         <Icon name="heart" size={12} fill="#A78BFA" className="drift absolute right-[18%] top-[30%] text-[#A78BFA]" style={{ animationDelay: '0.7s' }} />
         <Icon name="heart" size={18} fill="#F08BB0" className="drift absolute right-[8%] top-[60%] text-[#F08BB0]" style={{ animationDelay: '1.3s' }} />
-        <Character expr="heart" size={220} float className="pop" />
+        <Character expr="done" size={220} float className="pop" />
       </div>
       <h1 className="rise mt-4 text-title text-ink" style={{ animationDelay: '200ms' }}>
         프로필이 저장됐어! 💜

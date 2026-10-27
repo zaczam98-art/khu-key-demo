@@ -142,7 +142,7 @@ export function ProfileScreen() {
             관심 직무
           </SectionTitle>
           {!profile?.targetJobs.length ? (
-            <EmptyState expr="think" title="아직 저장된 직무가 없어" desc="직무 탐색을 하면 여기에 정리돼." action={{ label: '직무 탐색 시작하기', to: '/explore' }} />
+            <EmptyState expr="search" title="아직 저장된 직무가 없어" desc="직무 탐색을 하면 여기에 정리돼." action={{ label: '직무 탐색 시작하기', to: '/explore' }} />
           ) : (
             <ul className="card space-y-1 !p-2">
               {profile.targetJobs.map((job, i) => {

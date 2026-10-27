@@ -54,7 +54,7 @@ export function EssayDetail() {
   };
 
   if (loading) return <div className="p-4"><div className="skeleton h-40 rounded-card" /></div>;
-  if (!app) return <div className="p-4"><EmptyState expr="think" title="지원 건을 찾을 수 없어" action={{ label: '자소서로', to: '/essay' }} /></div>;
+  if (!app) return <div className="p-4"><EmptyState expr="surprised" title="지원 건을 찾을 수 없어" action={{ label: '자소서로', to: '/essay' }} /></div>;
   const allDone = app.questions.length > 0 && app.questions.every((q) => q.status === '완료');
   const stageIndex = STAGES.indexOf(app.stage);
   const submitted = stageIndex >= STAGES.indexOf('제출');

@@ -24,7 +24,7 @@ export function EssayDone() {
       <div className="relative flex items-center justify-center py-2">
         <Icon name="sparkle" size={20} className="pop absolute left-[20%] top-[10%] text-primary/60" style={{ animationDelay: '0.3s' }} />
         <Icon name="sparkle" size={14} className="pop absolute right-[22%] top-[60%] text-warn/70" style={{ animationDelay: '0.7s' }} />
-        <Character expr="smile" size={200} float />
+        <Character expr="done" size={200} float />
       </div>
       <div className="flex-1 px-4 pb-8">
         <div className="card rise">

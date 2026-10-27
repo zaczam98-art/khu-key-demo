@@ -20,7 +20,7 @@ export function MockDetail() {
   const [open, setOpen] = useState<number | null>(null);
 
   if (loading) return <div className="p-4"><div className="skeleton h-40 rounded-card" /></div>;
-  if (!session) return <div className="p-4"><EmptyState expr="think" title="기록을 찾을 수 없어" action={{ label: '면접으로', to: '/mock' }} /></div>;
+  if (!session) return <div className="p-4"><EmptyState expr="surprised" title="기록을 찾을 수 없어" action={{ label: '면접으로', to: '/mock' }} /></div>;
   const details = session.details ?? [];
 
   return (

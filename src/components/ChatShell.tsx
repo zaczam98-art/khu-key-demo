@@ -170,7 +170,7 @@ export function ChatShell({ bot, intro, systemHint, quickReplies, quickActions, 
   const typing = typingIndex !== null;
   const delayFor = (i: number) => (i < restoredCount.current ? `${Math.min(i, 8) * 60}ms` : '0ms');
   const avatarExpr: Expr = persona?.expr ?? 'default';
-  const headerExpr: Expr = busy ? 'think' : mood;
+  const headerExpr: Expr = busy ? 'think' : text.trim() && !persona ? 'listen' : mood;
 
   return (
     <div className="relative flex h-full min-h-0 flex-col bg-canvas">

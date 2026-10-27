@@ -43,7 +43,7 @@ export function ExperienceDetail() {
   };
 
   if (card === undefined) return <div className="p-4"><div className="skeleton h-40 rounded-card" /></div>;
-  if (card === null) return <div className="p-4"><EmptyState expr="think" title="카드를 찾을 수 없어" action={{ label: '프로필로', to: '/profile' }} /></div>;
+  if (card === null) return <div className="p-4"><EmptyState expr="surprised" title="카드를 찾을 수 없어" action={{ label: '프로필로', to: '/profile' }} /></div>;
 
   const Section = ({ title, items }: { title: string; items: string[] }) =>
     items.length ? (

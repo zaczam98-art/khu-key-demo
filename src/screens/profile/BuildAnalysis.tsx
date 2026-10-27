@@ -71,7 +71,7 @@ export function BuildAnalysis() {
       <BuildHeader step={4} back="/profile/build/more" />
       <div className="flex-1 px-4 pb-8 pt-1">
         <div className="rise flex items-start gap-3">
-          <Character expr={analysis ? 'smile' : 'think'} size={48} className="shrink-0 rounded-full bg-lavender" />
+          <Character expr={analysis ? 'smile' : 'laptop'} size={48} className="shrink-0 rounded-full bg-lavender" />
           <div className="bubble-bot">{analysis ? '지금까지 이야기한 경험들을\n바탕으로 루다가 너의 강점과 특성을\n정리해봤어!' : '경험 카드들을 모아서\n강점을 정리하는 중이야...'}</div>
         </div>
         {!analysis && !error && (

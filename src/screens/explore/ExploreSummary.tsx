@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Navigate, useNavigate } from 'react-router-dom';
 import { TitleHeader } from '../../components/Header';
+import { Character } from '../../components/Character';
 import { Icon } from '../../components/Icon';
 import { Spinner } from '../../components/ui';
 import { db } from '../../lib/db';
@@ -47,8 +48,8 @@ export function ExploreSummary() {
       />
       <div className="flex-1 px-4 pb-8 pt-2">
         <section className="rise rounded-card bg-lavender p-5">
-          <h2 className="flex items-center gap-1.5 text-body font-semibold text-ink">
-            <Icon name="sparkle" size={16} className="text-primary" />
+          <h2 className="flex items-center gap-2 text-body font-semibold text-ink">
+            <Character expr="explain" size={28} className="rounded-full bg-surface" />
             루다가 발견한 너의 키워드
           </h2>
           <div className="mt-3 flex flex-wrap gap-2">

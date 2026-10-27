@@ -96,7 +96,7 @@ export function MockResult() {
       <div className="flex min-h-full flex-col bg-canvas">
         <TitleHeader title="면접 결과" back="/mock" />
         <div className="flex flex-col items-center px-4 pt-10">
-          <Character expr="suit" size={120} float />
+          <Character expr="laptop" size={120} float />
           <p className="mt-4 text-body text-ink">답변을 기준표에 맞춰 채점하는 중이야</p>
           <div className="mt-6 w-full space-y-3">
             {RUBRIC.map((r) => (
@@ -109,7 +109,7 @@ export function MockResult() {
   if (session === null)
     return (
       <div className="p-4">
-        <EmptyState expr="think" title="채점할 답변이 없어" desc="면접을 먼저 진행해 줘." action={{ label: '면접 시작', to: '/mock' }} />
+        <EmptyState expr="surprised" title="채점할 답변이 없어" desc="면접을 먼저 진행해 줘." action={{ label: '면접 시작', to: '/mock' }} />
       </div>
     );
 
@@ -123,7 +123,7 @@ export function MockResult() {
           <div className="relative">
             <Icon name="sparkle" size={18} className="pop absolute -left-3 top-0 text-warn/70" style={{ animationDelay: '0.3s' }} />
             <Icon name="sparkle" size={14} className="pop absolute right-0 top-6 text-primary/60" style={{ animationDelay: '0.6s' }} />
-            <Character expr="smile" size={150} float className="pop" />
+            <Character expr="done" size={150} float className="pop" />
           </div>
           <div className="relative flex h-28 w-28 items-center justify-center">
             <svg width="112" height="112" viewBox="0 0 112 112" className="absolute inset-0 -rotate-90">

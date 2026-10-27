@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Navigate, useNavigate } from 'react-router-dom';
 import { TitleHeader } from '../../components/Header';
+import { Character } from '../../components/Character';
 import { Icon } from '../../components/Icon';
 import { Badge, Spinner } from '../../components/ui';
 import { findJob } from '../../data/jobs';
@@ -33,7 +34,10 @@ export function ExploreJobs() {
     <div className="flex min-h-full flex-col bg-canvas">
       <TitleHeader title="추천 직무" back="/explore/summary" />
       <div className="flex-1 space-y-3 px-4 pb-8 pt-2">
-        <p className="rise text-small text-muted">대화에서 찾은 성향에 가까운 순서예요. 카드를 누르면 자세히 볼 수 있어.</p>
+        <div className="rise flex items-start gap-3">
+          <Character expr="idea" size={44} className="shrink-0 rounded-full bg-lavender" />
+          <div className="bubble-bot">{'대화에서 찾은 성향에 가까운 순서야.\n카드를 누르면 자세히 볼 수 있어.'}</div>
+        </div>
         {result.jobs.map((job, i) => {
           const entry = findJob(job.name);
           return (
