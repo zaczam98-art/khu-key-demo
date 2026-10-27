@@ -194,7 +194,7 @@ export function EssayQuestionScreen() {
         {step === 'pick' && (
           <>
             <div className="rise flex items-start gap-3">
-              <Character expr="smile" size={44} className="shrink-0 rounded-full bg-lavender" />
+              <Character expr="default" size={44} className="shrink-0 rounded-full bg-lavender" />
               <div className="bubble-bot">{`이 기업의 자소서 문항을 분석해봤어!\n${data?.nickname ?? '너'}의 프로필에서 활용할 수 있는\n경험들을 먼저 추천해줄게.\n어떤 경험을 쓸지 같이 골라볼까? 💡`}</div>
             </div>
             <p className="mt-4 text-small text-muted">{q.text}</p>
@@ -392,7 +392,7 @@ export function EssayQuestionScreen() {
         {detail && (
           <>
             <div className="flex items-start gap-3">
-              <Character expr="smile" size={40} className="shrink-0 rounded-full bg-lavender" />
+              <Character expr="default" size={40} className="shrink-0 rounded-full bg-lavender" />
               <div className="bubble-bot !max-w-none">{'이 경험을 자소서에 사용하려면\n조금 더 구체적인 내용이 필요해!\n내가 기억한 내용은 이 정도야.\n맞는지 확인해줘, 부족한 부분은\n추가로 질문할게! 😊'}</div>
             </div>
             <div className="card mt-3 !p-4">

@@ -35,7 +35,7 @@ export function ExploreStart() {
         {SPARKLES.map((s, i) => (
           <Icon key={i} name="sparkle" size={s.size} className="pop absolute text-primary/60" style={{ left: s.left, top: s.top, animationDelay: s.delay }} />
         ))}
-        <Character expr="smile" size={240} float />
+        <Character expr="default" size={240} float />
       </div>
       <div className="card rise text-center" style={{ animationDelay: '120ms' }}>
         <h1 className="text-title text-ink">안녕! 나는 루다야 👋</h1>

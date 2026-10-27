@@ -23,7 +23,7 @@ export function Splash() {
   if (!show) return null;
   return (
     <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-lavender" aria-hidden="true">
-      <Character expr="smile" size={140} className="pop" />
+      <Character expr="default" size={140} className="pop" />
       <p className="rise mt-4 text-title text-primary" style={{ animationDelay: '150ms' }}>
         쿠키
       </p>

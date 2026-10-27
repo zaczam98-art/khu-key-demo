@@ -21,7 +21,7 @@ export function BuildMore() {
       <BuildHeader step={4} back="/profile" />
       <div className="flex-1 px-4 pb-6 pt-1">
         <div className="rise flex items-start gap-3">
-          <Character expr="smile" size={48} className="shrink-0 rounded-full bg-lavender" />
+          <Character expr="default" size={48} className="shrink-0 rounded-full bg-lavender" />
           <div className="bubble-bot">{'다른 경험도 더 추가해볼까?\n아니면 이제 그만할까?'}</div>
         </div>
         <ul className="mt-5 space-y-2">

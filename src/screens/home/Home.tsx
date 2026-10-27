@@ -56,7 +56,7 @@ export function Home() {
       <PageTitle title="홈" right={mode === null ? <span className="skeleton h-5 w-16 rounded-full" /> : <Badge tone={mode === 'live' ? 'success' : 'line'}>{mode === 'live' ? 'ChatKHU 연결됨' : '체험 모드'}</Badge>} />
 
       <div className="rise mt-3 flex items-start gap-3">
-        <Character expr="smile" size={64} float className="shrink-0 rounded-full bg-lavender" />
+        <Character expr="default" size={64} float className="shrink-0 rounded-full bg-lavender" />
         {loading || !nudge ? <div className="skeleton h-20 w-56 rounded-bubble rounded-tl-md" /> : <div className="bubble-bot pop">{nudge.text}</div>}
       </div>
       {nudge?.cta && (

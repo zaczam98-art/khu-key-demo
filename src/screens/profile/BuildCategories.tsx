@@ -27,7 +27,7 @@ export function BuildCategories() {
       <BuildHeader step={2} back="/profile/build" />
       <div className="flex-1 px-4 pb-6 pt-1">
         <div className="rise flex items-start gap-3">
-          <Character expr="smile" size={48} className="shrink-0 rounded-full bg-lavender" />
+          <Character expr="default" size={48} className="shrink-0 rounded-full bg-lavender" />
           <div className="bubble-bot">{'지금까지 해본 경험이 있는\n활동을 모두 선택해줘!\n(없어도 괜찮아. 나중에 추가할 수 있어😊)'}</div>
         </div>
         <div className="mt-5 grid grid-cols-2 gap-3">

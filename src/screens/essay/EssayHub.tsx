@@ -29,7 +29,7 @@ export function EssayHub() {
       <div className="flex-1 px-4 pb-6 pt-1">
         {loading && <div className="card skeleton h-24" />}
         {!loading && sorted.length === 0 && (
-          <EmptyState expr="smile" title="첫 지원 건을 추가해 보자" desc={'공고 링크를 넣으면 키워드와 문항을\n루다가 뽑아 줘.'} action={{ label: '지원 건 추가', to: '/essay/new' }} />
+          <EmptyState expr="default" title="첫 지원 건을 추가해 보자" desc={'공고 링크를 넣으면 키워드와 문항을\n루다가 뽑아 줘.'} action={{ label: '지원 건 추가', to: '/essay/new' }} />
         )}
         <ul className="space-y-2">
           {sorted.map((a, i) => {

@@ -183,7 +183,7 @@ export function EssayNew() {
       <TitleHeader title="지원 건 추가" back="/essay" />
       <form onSubmit={analyze} className="flex-1 space-y-4 px-4 pb-8 pt-1">
         <div className="rise flex items-start gap-3">
-          <Character expr="smile" size={44} className="shrink-0 rounded-full bg-lavender" />
+          <Character expr="default" size={44} className="shrink-0 rounded-full bg-lavender" />
           <div className="bubble-bot">{'회사와 직무, 그리고 공고를 알려 줘.\n키워드와 문항을 내가 뽑아 줄게!'}</div>
         </div>
         <div className="card rise space-y-4" style={{ animationDelay: '60ms' }}>

@@ -24,7 +24,7 @@ export function BuildIntro() {
       <BuildHeader step={1} back="/profile" />
       <div className="relative flex flex-1 items-center justify-center px-6 py-4">
         <Icon name="sparkle" size={22} className="pop absolute right-[18%] top-[24%] text-primary/60" style={{ animationDelay: '0.4s' }} />
-        <Character expr="smile" size={230} float />
+        <Character expr="default" size={230} float />
       </div>
       <div className="card rise mx-4 mb-6 text-center">
         <h1 className="text-title text-ink">이제 너에 대해 더 알아갈게! 🥰</h1>

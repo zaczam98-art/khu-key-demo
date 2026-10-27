@@ -41,7 +41,7 @@ export function Welcome() {
   return (
     <div className="flex flex-1 flex-col bg-gradient-to-b from-lavender via-canvas to-canvas px-6 pb-8 pt-[max(24px,env(safe-area-inset-top))]">
       <div className="flex flex-1 items-center justify-center">
-        <Character expr="smile" size={220} float />
+        <Character expr="default" size={220} float />
       </div>
       <form onSubmit={finish} className="card rise">
         <h1 className="text-title text-ink">안녕! 나는 루다야 👋</h1>
