@@ -77,7 +77,7 @@ ChatLog      { id, module, turns:{role, content, at}[] }   // 화면 복원용, 
 - 응답 끝에 `<<EVENT:{"type":"summary_ready"}>>` 같은 태그가 오면 화면 전환 이벤트로 처리하고 말풍선에는 보이지 않게 합니다(스튜디오 챗봇 지시문에 같은 규약을 넣습니다).
 - 대화 로그는 ChatLog에 저장해 새로고침해도 복원.
 
-캐릭터 표정: `public/char/{default,smile,think,wink,suit}.png`. 팀원이 주기 전까지는 같은 크기의 자리표시 이미지를 둡니다.
+캐릭터 표정: `public/char/{default,smile,think,wink,suit,heart}.png`. 팀 시트 `design/05_캐릭터_표정.png`(15종)에서 원형 512px로 잘라 넣었고, 새 표정도 같은 시트에서 같은 방식으로 자릅니다.
 
 ## 7. 디자인 토큰 (시안 기준)
 
