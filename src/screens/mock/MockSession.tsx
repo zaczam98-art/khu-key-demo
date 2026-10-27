@@ -154,10 +154,10 @@ export function MockSession() {
       {/* 면접관: 면접실 배경(public/mock/bg-portrait.jpg) 위에 정장 루다를 의자에 맞춰 올립니다.
           배경은 바닥(책상)을 기준으로 폭에 맞춰 깔고 위쪽(천장)이 잘립니다. 책상 부분을 한 번 더 그려 루다가 책상 뒤에 앉은 것처럼 보이게 합니다. */}
       <div className="relative flex-1 overflow-hidden">
-        <div className="absolute inset-x-0 bottom-0" style={{ aspectRatio: '840 / 1505' }}>
+        <div className="absolute inset-x-0 bottom-0" style={{ aspectRatio: '840 / 1505', transform: 'translateY(9%)' }}>
           <img src={BG} alt="" draggable={false} className="h-full w-full select-none object-cover" />
           {/* 가운데 정렬은 감싸는 요소가 맡습니다. float 애니메이션이 transform 을 쓰므로 같은 요소에 두면 translate 가 덮입니다. */}
-          <div className="absolute left-1/2 w-[54%] -translate-x-1/2" style={{ bottom: '17%' }}>
+          <div className="absolute left-1/2 w-[68%] -translate-x-1/2" style={{ bottom: '19%' }}>
             <img src={`${import.meta.env.BASE_URL}char/suit-cutout.png`} alt="면접관 루다" draggable={false} className={`w-full select-none ${busy ? '' : 'float'}`} />
           </div>
           <img src={BG} alt="" draggable={false} aria-hidden="true" className="absolute inset-0 h-full w-full select-none object-cover" style={{ clipPath: 'inset(78.4% 0 0 0)' }} />
