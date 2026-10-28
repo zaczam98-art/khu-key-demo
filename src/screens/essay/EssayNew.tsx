@@ -27,6 +27,7 @@ export function EssayNew() {
   const [url, setUrl] = useState('');
   const [text, setText] = useState('');
   const [fetching, setFetching] = useState(false);
+  const [linkError, setLinkError] = useState<string | null>(null); // 링크 가져오기 실패 이유. 토스트는 금방 사라져서 입력란 아래에 남겨 둡니다.
   const [analyzing, setAnalyzing] = useState(false);
   const [result, setResult] = useState<PostExtract | null>(null);
   const [tab, setTab] = useState<(typeof TABS)[number]>('채용공고 요약');
@@ -41,12 +42,13 @@ export function EssayNew() {
   const grab = async () => {
     if (!url.trim()) return;
     setFetching(true);
+    setLinkError(null);
     try {
       const r = await fetchJobPost(url.trim());
       setText(r.text);
       showToast(r.demo ? '체험 모드 공고를 불러왔어요' : '공고를 가져왔어요');
     } catch (e) {
-      showToast((e as Error).message);
+      setLinkError((e as Error).message);
     } finally {
       setFetching(false);
     }
@@ -200,14 +202,30 @@ export function EssayNew() {
           </Field>
         </div>
         <div className="card rise space-y-3" style={{ animationDelay: '120ms' }}>
-          <Field label="공고 링크" hint="링크 1건만 가져와요. 로그인이 필요한 사이트는 본문을 붙여 넣어 주세요.">
+          <Field label="공고 링크" hint={linkError ? undefined : '링크 1건만 가져와요. 로그인이 필요한 사이트는 본문을 붙여 넣어 주세요.'}>
             <div className="flex gap-2">
-              <input ref={urlRef} className="field" type="url" inputMode="url" value={url} onChange={(e) => setUrl(e.target.value)} placeholder="https://" />
+              <input
+                ref={urlRef}
+                className={`field ${linkError ? 'border-warn ring-2 ring-warn/20' : ''}`}
+                type="url"
+                inputMode="url"
+                value={url}
+                onChange={(e) => {
+                  setUrl(e.target.value);
+                  setLinkError(null);
+                }}
+                placeholder="https://"
+              />
               <button type="button" onClick={() => void grab()} disabled={fetching || !url.trim()} className="btn-secondary shrink-0 px-4">
                 {fetching ? <Spinner /> : <Icon name="link" size={16} />}
                 가져오기
               </button>
             </div>
+            {linkError && (
+              <span role="alert" className="mt-1 block text-caption text-warn">
+                {linkError}
+              </span>
+            )}
           </Field>
           <Field label="공고 본문">
             <textarea className="field min-h-[160px]" value={text} onChange={(e) => setText(e.target.value)} placeholder="담당 업무, 자격 요건, 인재상, 마감일, 자소서 문항을 붙여 넣어 주세요." />
