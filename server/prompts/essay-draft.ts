@@ -17,7 +17,7 @@ mode=draft. body 에 새 초안을 쓴다. 출력 길이를 아끼기 위해 fee
 
 export const ESSAY_FEEDBACK_SYSTEM = `${COMMON}
 
-mode=feedback. body 에는 사용자의 글을 고치지 말고 그대로 돌려준다. points 와 examples 에 첨삭을 담는다. 글자 수가 제한을 넘는지, 첫 문장이 결론인지, 공고 키워드와 가치관이 이어지는지, 숫자 근거가 있는지를 본다.`;
+mode=feedback. body 는 빈 문자열 "" 로 둔다(앱이 사용자의 글을 그대로 쓴다. 출력 길이를 아끼기 위해 되돌려 쓰지 않는다). points 와 examples 에 첨삭을 담는다. 글자 수가 제한을 넘는지, 첫 문장이 결론인지, 공고 키워드와 가치관이 이어지는지, 숫자 근거가 있는지를 본다.`;
 
 export const ESSAY_REVISE_SYSTEM = `${COMMON}
 

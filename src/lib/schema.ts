@@ -111,7 +111,7 @@ export const postExtractJsonSchema = {
 
 // ---------- 자소서 초안·첨삭·전체 수정 (/api/essay-draft) ----------
 export const EssayDraftSchema = z.object({
-  body: z.string().min(1),
+  body: z.string(), // feedback 모드에서는 빈 문자열(앱이 사용자의 글을 채움)
   feedback: z.string(),
   points: z.array(z.string()).max(6),
   examples: z.array(z.object({ before: z.string(), after: z.string() })).max(4),
