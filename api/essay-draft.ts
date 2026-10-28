@@ -43,7 +43,9 @@ export async function POST(req: Request): Promise<Response> {
   const demo: EssayDraft =
     mode === 'draft' ? demoData.draft : mode === 'revise' ? demoData.revise : { body: b.body ?? '', ...demoData.feedback };
   try {
-    const r = await completeJson<EssayDraft>(SYSTEM[mode], [{ role: 'user', content }], essayDraftJsonSchema, 'essay_draft', anon, (data) => EssayDraftSchema.parse(data), EssayDraftSchema.parse(demo));
+    // 초안·전체 수정은 본문 700자 안팎을 새로 쓰므로 빠른 모델을 씁니다(Sonnet 은 40초를 넘겨 게이트웨이가 생성을 끊었음). 첨삭은 출력이 짧아 기본 모델입니다.
+    const model = mode === 'feedback' ? undefined : process.env.CHATKHU_ESSAY_MODEL || 'claude-haiku-5-5';
+    const r = await completeJson<EssayDraft>(SYSTEM[mode], [{ role: 'user', content }], essayDraftJsonSchema, 'essay_draft', anon, (data) => EssayDraftSchema.parse(data), EssayDraftSchema.parse(demo), { model, maxTokens: 2500 });
     return json({ result: r.data, credits: r.credits, demo: r.demo });
   } catch (e) {
     return json({ error: '자소서 작업에 실패했어요. 다시 시도해 주세요.', detail: (e as Error).message }, 502);

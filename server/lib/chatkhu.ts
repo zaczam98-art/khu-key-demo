@@ -103,7 +103,7 @@ function estimate(model: string, usage: Usage, chars: number): number {
   return ((chars / 2) * (inPrice + outPrice)) / 1000;
 }
 
-type Completion = { choices?: { message?: { content?: string } }[]; usage?: Usage; credits?: number };
+type Completion = { choices?: { message?: { content?: string }; finish_reason?: string }[]; usage?: Usage; credits?: number };
 
 async function call(path: string, body: unknown): Promise<Completion> {
   const r = await fetch(`${BASE()}${path}`, {
@@ -207,10 +207,12 @@ export async function completeJson<T>(
   anon: string,
   validate: (data: unknown) => T,
   demoValue: T,
+  opts: { model?: string; maxTokens?: number } = {},
 ): Promise<JsonResult<T>> {
   if (!apiKey()) return { data: demoValue, demo: true, reason: 'no-key' };
   if (await overCap()) return { data: demoValue, demo: true, reason: 'cap' };
-  const model = MODEL();
+  // 긴 출력(자소서 초안)은 호출한 쪽이 빠른 모델을 지정합니다. 게이트웨이가 약 40초에서 생성을 끊어 Sonnet 으로는 본문이 잘렸습니다(2026-10-28).
+  const model = opts.model || MODEL();
   const chars = system.length + messages.reduce((n, m) => n + m.content.length, 0);
   let lastError = '';
   for (let attempt = 0; attempt < 2; attempt++) {
@@ -219,7 +221,7 @@ export async function completeJson<T>(
         model,
         messages: [{ role: 'system', content: system }, ...messages],
         temperature: 0.3,
-        max_tokens: 3000,
+        max_tokens: opts.maxTokens ?? 3000,
         response_format: { type: 'json_schema', json_schema: { name, strict: true, schema } },
       });
       const raw = res.choices?.[0]?.message?.content ?? '';
@@ -227,8 +229,10 @@ export async function completeJson<T>(
       try {
         data = validate(parseJsonLoosely(raw));
       } catch (e) {
-        // 어디서 깨졌는지 남겨 둡니다(응답 머리 160자). 다음 시도에서 같은 오류면 호출한 쪽이 detail 로 돌려줍니다.
-        throw new Error(`${(e as Error).message} | 응답 머리: ${raw.slice(0, 160).replace(/\s+/g, ' ')}`);
+        // 어디서 깨졌는지 남겨 둡니다(모델, 끝난 이유, 길이, 응답 머리). 다음 시도에서 같은 오류면 호출한 쪽이 detail 로 돌려줍니다.
+        throw new Error(
+          `${(e as Error).message} | ${model}, finish_reason=${res.choices?.[0]?.finish_reason ?? '-'}, ${raw.length}자 | 응답 머리: ${raw.slice(0, 120).replace(/\s+/g, ' ')}`,
+        );
       }
       const credits = typeof res.credits === 'number' ? res.credits : estimate(model, res.usage, chars + raw.length);
       await record(credits, anon);
