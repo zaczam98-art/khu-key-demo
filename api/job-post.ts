@@ -39,6 +39,17 @@ export async function POST(req: Request): Promise<Response> {
     if (text.length < 200) throw new Error('too short');
     return json({ text, demo: false });
   } catch (e) {
-    return json({ error: '공고를 가져오지 못했어요. 본문을 직접 붙여 넣어 주세요.', detail: (e as Error).message }, 502);
+    const detail = (e as Error).message;
+    // 왜 안 되는지 화면에서 바로 알 수 있게 이유를 나눕니다. 스크립트로 그리는 사이트(기아 채용, 원티드 등)와 외부 접근을 막는 사이트가 대부분입니다.
+    const why = detail === 'too short'
+      ? '이 사이트는 공고를 화면에서 스크립트로 그려서 링크만으로는 본문을 읽을 수 없어요.'
+      : /HTTP (401|403|429|999)/.test(detail)
+        ? '이 사이트가 외부 접근을 막고 있어요.'
+        : /HTTP 404/.test(detail)
+          ? '공고 주소를 찾을 수 없어요. 로그인해야 보이는 공고일 수 있어요.'
+          : /abort/i.test(detail)
+            ? '사이트 응답이 너무 늦어요.'
+            : '공고를 가져오지 못했어요.';
+    return json({ error: `${why} 공고 본문을 복사해 붙여 넣어 주세요.`, detail }, 502);
   }
 }

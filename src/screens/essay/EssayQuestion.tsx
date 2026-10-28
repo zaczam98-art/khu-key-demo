@@ -96,6 +96,14 @@ export function EssayQuestionScreen() {
       setBusy(null);
     }
   };
+  // 경험 카드 없이, 또는 AI 초안 없이 바로 쓰고 싶을 때. 본문 칸이 비어 있으면 빈 칸으로, 이미 쓴 글이 있으면 그 글로 엽니다.
+  const writeMyself = () => {
+    if (!q) return;
+    setBody(q.versions[q.versions.length - 1]?.body ?? '');
+    setStep('draft');
+    setDraftTab('AI 초안');
+    showToast('본문 칸에 바로 써도 돼');
+  };
   const getFeedback = async () => {
     const b = base();
     if (!b || !body.trim()) return;
@@ -209,7 +217,7 @@ export function EssayQuestionScreen() {
             </div>
             {cards.length === 0 ? (
               <div className="mt-4">
-                <EmptyState expr="write" title="경험 카드가 없어" desc="카드가 있어야 초안을 쓸 수 있어." action={{ label: '프로필 구축하기', to: '/profile/build' }} />
+                <EmptyState expr="write" title="경험 카드가 없어" desc={'카드가 있어야 AI 초안을 쓸 수 있어.\n아래 "직접 작성하기"로 바로 써도 돼.'} action={{ label: '프로필 구축하기', to: '/profile/build' }} />
               </div>
             ) : (
               <ul className="mt-3 space-y-2">
@@ -356,10 +364,15 @@ export function EssayQuestionScreen() {
       {/* ---------- 하단 버튼 ---------- */}
       <div className="sticky bottom-0 bg-canvas/95 px-4 pb-[max(16px,env(safe-area-inset-bottom))] pt-2 backdrop-blur">
         {step === 'pick' && (
-          <button type="button" onClick={() => void makeDraft()} disabled={busy !== null || cards.length === 0} className="btn-primary w-full">
-            {busy === 'draft' ? <Spinner /> : <Icon name="wand" size={18} />}
-            {expIds.length ? `경험 ${expIds.length}개로 초안 만들기` : '경험을 고르고 초안 만들기'}
-          </button>
+          <div className="flex gap-2">
+            <button type="button" onClick={writeMyself} disabled={busy !== null} className="btn-secondary shrink-0 px-4">
+              직접 작성하기
+            </button>
+            <button type="button" onClick={() => void makeDraft()} disabled={busy !== null || cards.length === 0} className="btn-primary min-w-0 flex-1">
+              {busy === 'draft' ? <Spinner /> : <Icon name="wand" size={18} />}
+              {expIds.length ? `경험 ${expIds.length}개로 초안 만들기` : '경험 골라 초안 만들기'}
+            </button>
+          </div>
         )}
         {step === 'draft' && (
           <div className="flex gap-2">

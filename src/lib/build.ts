@@ -21,6 +21,30 @@ export function setBuild(state: BuildState): void {
   }
 }
 export const currentCategory = (s: BuildState): ExperienceCategory | undefined => s.categories[s.index];
+
+// 직무 탐색 대화에서 사용자가 이미 말한 문장 중 이 분류와 관련된 것. 경험 인터뷰에서 같은 이야기를 다시 시키지 않으려고
+// 첫 말풍선에 인용하고 서버로 보내는 화면 문맥에도 붙입니다. (팀 피드백 2026-10-28)
+const CATEGORY_WORDS: Record<ExperienceCategory, string[]> = {
+  동아리: ['동아리', '소모임', '밴드', '학회 활동'],
+  학회: ['학회', '스터디', '세미나'],
+  학생회: ['학생회', '총학', '과대', '학과 행사', '집행부'],
+  봉사: ['봉사', '멘토링', '튜터링'],
+  아르바이트: ['아르바이트', '알바', '카페', '편의점', '과외', '매장'],
+  인턴십: ['인턴', '현장실습', '대외활동', '서포터즈'],
+  공모전: ['공모전', '대회', '해커톤', '수상', '프로젝트'],
+  '자격증·교육': ['자격증', '교육', '수료', '부트캠프', '강의', '토익', '어학'],
+  기타: [],
+};
+export function exploreMentions(turns: { role: string; content: string }[], category: ExperienceCategory): string[] {
+  const words = CATEGORY_WORDS[category];
+  if (!words.length) return [];
+  return turns
+    .filter((t) => t.role === 'user' && words.some((w) => t.content.includes(w)))
+    .map((t) => t.content.replace(/\s+/g, ' ').trim())
+    .filter((c) => c.length >= 8)
+    .slice(0, 2)
+    .map((c) => (c.length > 90 ? `${c.slice(0, 90)}…` : c));
+}
 export const hasNext = (s: BuildState): boolean => s.index + 1 < s.categories.length;
 
 // 분류 격자의 설명 (시안 2번)

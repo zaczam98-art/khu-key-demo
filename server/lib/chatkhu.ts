@@ -132,8 +132,11 @@ export async function chat(bot: Bot, messages: Msg[], anon: string, systemHint?:
   const model = MODEL();
   try {
     const id = botId(bot);
+    // 스튜디오 챗봇은 system 메시지를 무시하므로 화면 문맥(고른 분류, 직무 탐색에서 이미 말한 내용)은 첫 사용자 메시지 앞에 붙여 보냅니다.
+    const withHint =
+      systemHint && history[0]?.role === 'user' ? [{ ...history[0], content: `[앱 참고 정보: ${systemHint}]\n\n${history[0].content}` }, ...history.slice(1)] : history;
     const res = id
-      ? await call(`/chatbots/${id}/chat/completions/`, { messages: history, stream: false })
+      ? await call(`/chatbots/${id}/chat/completions/`, { messages: withHint, stream: false })
       : await call('/chat/completions/', {
           model,
           messages: [{ role: 'system', content: FALLBACK_SYSTEM[bot] + (systemHint ? `\n\n[화면 문맥] ${systemHint}` : '') }, ...history],
@@ -147,6 +150,43 @@ export async function chat(bot: Bot, messages: Msg[], anon: string, systemHint?:
     return { bubbles: [content], credits, demo: false };
   } catch (e) {
     return { bubbles: demoBubbles(bot, history, systemHint), demo: true, reason: (e as Error).message };
+  }
+}
+
+// 모델이 JSON 문자열 안에 날 줄바꿈·탭을 그대로 넣는 경우가 있어(자소서 본문의 문단 구분) 이스케이프로 고칩니다.
+// 코드 펜스와 JSON 앞뒤의 설명 문장도 떼어 냅니다. 2026-10-28 자소서 초안이 "Unterminated string in JSON" 으로 실패한 원인입니다.
+export function parseJsonLoosely(raw: string): unknown {
+  let s = raw.replace(/^```(?:json)?\s*|\s*```$/g, '').trim();
+  const start = s.indexOf('{');
+  const end = s.lastIndexOf('}');
+  if (start > 0 || (end >= 0 && end < s.length - 1)) s = s.slice(Math.max(start, 0), end >= 0 ? end + 1 : undefined);
+  try {
+    return JSON.parse(s);
+  } catch {
+    let out = '';
+    let inStr = false;
+    let esc = false;
+    for (const ch of s) {
+      if (inStr) {
+        if (esc) {
+          out += ch;
+          esc = false;
+        } else if (ch === '\\') {
+          out += ch;
+          esc = true;
+        } else if (ch === '"') {
+          inStr = false;
+          out += ch;
+        } else if (ch === '\n') out += '\\n';
+        else if (ch === '\r') continue;
+        else if (ch === '\t') out += '\\t';
+        else out += ch;
+      } else {
+        if (ch === '"') inStr = true;
+        out += ch;
+      }
+    }
+    return JSON.parse(out);
   }
 }
 
@@ -175,7 +215,13 @@ export async function completeJson<T>(
         response_format: { type: 'json_schema', json_schema: { name, strict: true, schema } },
       });
       const raw = res.choices?.[0]?.message?.content ?? '';
-      const data = validate(JSON.parse(raw.replace(/^```(?:json)?\s*|\s*```$/g, '').trim()));
+      let data: T;
+      try {
+        data = validate(parseJsonLoosely(raw));
+      } catch (e) {
+        // 어디서 깨졌는지 남겨 둡니다(응답 머리 160자). 다음 시도에서 같은 오류면 호출한 쪽이 detail 로 돌려줍니다.
+        throw new Error(`${(e as Error).message} | 응답 머리: ${raw.slice(0, 160).replace(/\s+/g, ' ')}`);
+      }
       const credits = typeof res.credits === 'number' ? res.credits : estimate(model, res.usage, chars + raw.length);
       await record(credits, anon);
       return { data, credits, demo: false };
