@@ -221,7 +221,9 @@ export async function completeJson<T>(
         model,
         messages: [{ role: 'system', content: system }, ...messages],
         temperature: 0.3,
+        // 2026-10-28 실측: max_tokens 3000 을 보내도 finish_reason=length 로 600~1000자에서 끊겼습니다. OpenAI 의 새 이름도 같이 보냅니다.
         max_tokens: opts.maxTokens ?? 3000,
+        max_completion_tokens: opts.maxTokens ?? 3000,
         response_format: { type: 'json_schema', json_schema: { name, strict: true, schema } },
       });
       const raw = res.choices?.[0]?.message?.content ?? '';
