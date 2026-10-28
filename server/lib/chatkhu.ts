@@ -112,7 +112,15 @@ async function call(path: string, body: unknown): Promise<Completion> {
     body: JSON.stringify(body),
   });
   if (!r.ok) throw new Error(`ChatKHU ${r.status}: ${(await r.text()).slice(0, 300)}`);
-  return (await r.json()) as Completion;
+  // 응답 본문을 글로 받아 직접 파싱합니다. 긴 생성(자소서 초안)에서 본문이 중간에 끊겨 온 적이 있어, 끊기면 길이·소요 시간·꼬리를 오류에 남깁니다.
+  const started = Date.now();
+  const text = await r.text();
+  try {
+    return JSON.parse(text) as Completion;
+  } catch (e) {
+    const sec = ((Date.now() - started) / 1000).toFixed(1);
+    throw new Error(`ChatKHU 응답 본문 파싱 실패(${(e as Error).message}): ${text.length}자, 수신 ${sec}초, 헤더 ${r.headers.get('content-type') ?? '-'}/${r.headers.get('transfer-encoding') ?? '-'}, 꼬리 "${text.slice(-120).replace(/\s+/g, ' ')}"`);
+  }
 }
 
 const userCount = (messages: Msg[]) => messages.filter((m) => m.role === 'user').length;
